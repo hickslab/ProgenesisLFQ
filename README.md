@@ -15,7 +15,7 @@ source_url("https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/EWM_
 
 ### Load raw data
 ```{r}
-
+read_csv()
 ```
 
 
