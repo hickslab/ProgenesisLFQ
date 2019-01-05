@@ -1,31 +1,31 @@
 # ProgenesisLFQ
 
-### Load packages
 ```{r}
+
+# Load packages
 library(devtools)
 library(tidyverse)
 library(Biostrings)
 library(imp4p)
-```
 
-### Load functions 
-```{r}
+# Load functions 
 source_url("https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/EWM_ProgenesisLFQ_Global.R")
-```
 
-### Load raw data
-```{r}
-read_csv()
-```
+# Load raw data
+protm <- "https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/20180502_WOS52_Cr_UPS_protm.csv" %>%
+  load_data()
 
+# Define normalized abundance columns
+samples <- 10:21
 
-### Basic workflow
-```{r}
+# Workflow
 data <- protm %>%
   filter_contaminants() %>%
-  filter_peptides(threshold = 2) %>%
+  filter_peptides(peptides = 2, unique = 1) %>%
   split_group() %>%
-  simplify_cols(variable = "Accession", group = samples) %>%
-  data.frame()
-```
+  simplify_cols(variable = "Accession", group = samples)
+  
+# Write parsed data to file
+#write_csv(data, "20180821_EWM_AGG3-2_Global_filtered_threshold2.csv")
 
+```
