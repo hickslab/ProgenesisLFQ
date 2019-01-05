@@ -1,21 +1,25 @@
 # ProgenesisLFQ
-Processing of data from Progenesis QI for proteomics v2.0
 
-### Required packages
+## Packages
+
+*Load
 ```{r}
-# Load required packages
+library(devtools)
+library(tidyverse)
+library(Biostrings)
+library(imp4p)
+```
 
+* Or install
+```{r}
 #install.packages("tidyverse")
-require(tidyverse)
 
 #source("https://bioconductor.org/biocLite.R")
 #biocLite("Biostrings")
-require(Biostrings)
-
+#biocLite("imp4p")
 ```
 
-### Load functions 
+## Load functions 
 ```{r}
-source("./EWM_ProgenesisLFQ_redox_v2.R")
-
+source_url("https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/README.md")
 ```
