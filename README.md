@@ -1,14 +1,14 @@
 # ProgenesisLFQ
 
-## This repository contains functions to process Progenesis output data:
+**This repository contains functions to process Progenesis output data:**
 * Global proteomics
 * Phosphoproteomics
 * Redox proteomics
 
-## Copy and paste a script below into your local RStudio session
+**Copy and paste a script below into your local RStudio session**
 
 ## Global
-* Must edit:
+* Must edit in pasted:
   + Set working directory
   + Raw data filename
   + Column indeces with normalized abundance values
