@@ -1,17 +1,19 @@
 # ProgenesisLFQ
 
+Last updated: 01-18-2019 (EWM)
+
 **This repository contains functions to process Progenesis output data:**
 * Global proteomics
 * Phosphoproteomics
 * Redox proteomics
 
-**Copy and paste a script below into your local RStudio session**
-
-## Global
-* Must edit in pasted:
+## Global proteomics
+* Must edit in local session:
   + Set working directory
-  + Raw data filename
+  + Raw data filename in working directory
   + Column indeces with normalized abundance values
+
+**Copy and paste a script below into your local RStudio session**
 
 ```{r}
 # Load packages
@@ -51,4 +53,16 @@ data <- protm %>%
 # Write processed data to output file
 #write_csv(data, "###.csv")
 
+```
+
+## Phosphoproteomics
+* Must edit in local session:
+  + Set working directory
+  + Raw data filename in working directory
+  + Column indeces with normalized abundance values
+
+**Copy and paste a script below into your local RStudio session**
+
+```{r}
+###
 ```
