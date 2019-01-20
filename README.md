@@ -7,3 +7,8 @@
 * Peptide measurements, protein measurements, and FASTA database:
   + [Phosphoproteomics](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/ProgenesisLFQ_Phospho_Workflow.R)
   + [Redox proteomics](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/ProgenesisLFQ_Redox_Workflow.R)
+
+
+# *`StatLFQ`*
+
+**Statistical workflow for differential analysis.**
