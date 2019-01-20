@@ -4,11 +4,11 @@ Last updated: 01-18-2019 (EWM)
 
 **This repository contains functions to process Progenesis QI for proteomics v2.0 data:**
 * Protein measurements
-  + Global proteomics
+  + [Global proteomics](https://github.com/hickslab/ProgenesisLFQ#global-proteomics)
   
 * Peptide measurements:
-  + Phosphoproteomics
-  + Redox proteomics
+  + [Phosphoproteomics](https://github.com/hickslab/ProgenesisLFQ#phosphoproteomics)
+  + [Redox proteomics](https://github.com/hickslab/ProgenesisLFQ#redox-proteomics)
 
 ## Global proteomics
 * Must edit in local session:
@@ -16,7 +16,7 @@ Last updated: 01-18-2019 (EWM)
   + Raw data filename in working directory
   + Column indeces with normalized abundance values
 
-**Copy and paste a script below into your local RStudio session**
+**Copy script below and paste into your local RStudio session:**
 
 ```{r}
 # Load packages
@@ -65,8 +65,23 @@ data <- protm %>%
   + Raw data filename in working directory
   + Column indeces with normalized abundance values
 
-**Copy and paste a script below into your local RStudio session**
+**Copy script below and paste into your local RStudio session:**
+
+```{r}
+
+
+
+```
+
+## Redox proteomics
+* Must edit in local session:
+  + Set working directory
+  + Raw data filename in working directory
+  + Column indeces with normalized abundance values
+
+**Copy script below and paste into your local RStudio session:**
 
 ```{r}
 ###
 ```
+
