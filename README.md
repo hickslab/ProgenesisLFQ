@@ -1,11 +1,14 @@
-# ProgenesisLFQ
+# `ProgenesisLFQ`
 
 Last updated: 01-18-2019 (EWM)
 
-**This repository contains functions to process Progenesis output data:**
-* Global proteomics
-* Phosphoproteomics
-* Redox proteomics
+**This repository contains functions to process Progenesis QI for proteomics v2.0 data:**
+* Protein measurements
+  + Global proteomics
+  
+* Peptide measurements:
+  + Phosphoproteomics
+  + Redox proteomics
 
 ## Global proteomics
 * Must edit in local session:
@@ -28,6 +31,7 @@ library(tidyverse)
 
 # Set working directory where raw data is located
 setwd("###")
+
 
 # Load functions 
 source_url("https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/EWM_ProgenesisLFQ_Global.R")
