@@ -1,8 +1,6 @@
 # `ProgenesisLFQ`
 
-Last updated: 01-18-2019 (EWM)
-
-**This repository contains functions to process Progenesis QI for proteomics v2.0 data:**
+**This repository contains functions to process Progenesis QI for proteomics v2.0 data**
 * Protein measurements
   + [Global proteomics](https://github.com/hickslab/ProgenesisLFQ#global-proteomics)
   
