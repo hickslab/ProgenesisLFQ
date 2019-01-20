@@ -11,4 +11,7 @@
 
 # *`StatLFQ`*
 
-**Statistical workflow for differential analysis.**
+**Statistical workflow for differential analysis. Takes ProgenesisLFQ output in simple format (Variable followed by abundance columns). The following tests are available:**
+* [Pairwise *t*-test](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/ProgenesisLFQ_Global_Workflow.R)
+  
+* [One-way ANOVA](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/ProgenesisLFQ_Phospho_Workflow.R)
