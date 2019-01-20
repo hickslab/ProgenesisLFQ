@@ -13,7 +13,7 @@ setwd("###")
 
 
 # Load functions 
-source_url("https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/EWM_ProgenesisLFQ_Global.R")
+source_url("https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/ProgenesisLFQ_Global.R")
 
 
 # Load raw data
