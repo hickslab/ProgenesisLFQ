@@ -49,8 +49,7 @@ data <- pepm %>%
   filter_redox(reduced = "IAM") %>%
   get_identifier_redox(database = database, reduced = "IAM") %>%
   reduce_identifiers(group = samples) %>%
-  simplify_cols(variable = "Identifier", group = samples) %>%
-  data.frame()
+  simplify_cols(variable = "Identifier", group = samples)
 
 
 # Write parsed data to file
