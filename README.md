@@ -1,4 +1,4 @@
-# `ProgenesisLFQ`
+# `*ProgenesisLFQ*`
 
 **This repository contains functions to process Progenesis QI for proteomics v2.0 data. Download the Workflow files and open in RStudio to start. The following data files are needed:**
 * Protein measurements

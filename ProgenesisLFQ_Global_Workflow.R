@@ -25,12 +25,12 @@ protm <- "###.csv" %>%
 samples <- #:#
   
   
-  # Workflow
-  data <- protm %>%
-  filter_contaminants() %>%
-  filter_peptides(peptides = 2, unique = 1) %>%
-  split_group() %>%
-  simplify_cols(variable = "Accession", group = samples)
+# Workflow
+Data <- protm %>%
+filter_contaminants() %>%
+filter_peptides(peptides = 2, unique = 1) %>%
+split_group() %>%
+simplify_cols(variable = "Accession", group = samples)
 
 
 # Write processed data to output file
