@@ -12,9 +12,9 @@
 # *`StatLFQ`*
 
 **Statistical workflow for differential analysis. Takes ProgenesisLFQ output in simple format (variable column followed by abundance values). The following tests are available:**
-* [Pairwise *t*-test](###)
+* [Pairwise *t*-test](https://)
   
-* [One-way ANOVA](###)
+* [One-way ANOVA](https://)
 
 
 # *`AnnotLFQ`*
