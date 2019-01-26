@@ -1,7 +1,3 @@
-# Check for necessary packages
-library(tidyverse)
-
-
 rename_compare <- function(data, num.cond, names){
   for (x in 1:num.cond){
     
@@ -23,14 +19,6 @@ plot_corr <- function(data, group = group) {
   
   ggcorr(temp.data,
          label = TRUE)
-  
-}
-
-
-plot_scatter <- function(data, samples){
-  #@TODO
-    
-  
   
 }
 
@@ -147,16 +135,16 @@ plot_heatmap <- function(data, group = group){
 }
 
 
-plot_pca <- function(data, group = group){
-  temp.pca <- temp.data %>%
-    select(-Identifier, -group) %>%
-    dcast(., variable) %>%
-    prcomp()
-  
-  temp.pca$x %>%
-    data.frame(., temp.data$group) %>%
-    ggplot(., aes(x = PC1, y = PC2)) +
-    geom_point()
+plot_pca <- function(data2){
+  data2 %>%
+    select(-1) %>%
+    prcomp() %>%
+    .$rotation %>%
+    data.frame() %>%
+    rownames_to_column() %>%
+    mutate(condition = str_sub(rowname, end = -2)) %>%
+    ggplot(., aes(x = PC1, y = PC2, color = condition)) +
+    geom_point(size = 5)
   
 }
 
