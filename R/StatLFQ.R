@@ -19,16 +19,6 @@ get_design <- function(group){
     as.vector() %>%
     sort()
   
-  
-  temp.names <- data %>%
-    select(1) %>%
-    names()
-  
-  temp.names <- group %>%
-    unlist() %>%
-    names() %>%
-    c(temp.names, .)
-  
 }
 
 
