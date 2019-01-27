@@ -15,9 +15,19 @@ get_design <- function(group){
   
   num.sample = 1:(length(unlist(group)) / length(group))
   
-  temp.design <- outer(num.cond, num.sample, paste, sep = "") %>%
+  temp.design <- outer(num.cond, num.sample, paste, sep = "-") %>%
     as.vector() %>%
     sort()
+  
+  
+  temp.names <- data %>%
+    select(1) %>%
+    names()
+  
+  temp.names <- group %>%
+    unlist() %>%
+    names() %>%
+    c(temp.names, .)
   
 }
 
@@ -177,8 +187,6 @@ calculate_ttest <- function(data, group.compare = group.compare, fdr = TRUE){
 
 
 calculate_fc <- function(data, group.compare = group.compare, method = "log2", difference = TRUE){
-  # @param: data - column 1 is a variable with abundance columns following, must be transformed
-  
   for (x in group.compare){
     temp.data <- data
     
