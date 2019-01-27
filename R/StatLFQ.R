@@ -9,15 +9,16 @@ load_simple <- function(name, type = ".csv"){
 }
 
 
-get_design <- function(group){
-  num.cond <- letters[1:length(group)] %>%
-    toupper()
+rename_columns <- function(df, group = group){
+  variable <- df %>%
+    select(1) %>%
+    names()
   
-  num.sample = 1:(length(unlist(group)) / length(group))
-  
-  temp.design <- outer(num.cond, num.sample, paste, sep = "-") %>%
-    as.vector() %>%
-    sort()
+  names(df) <- group %>%
+    names() %>%
+    rep(., group %>% map(., length)) %>%
+    paste(., group %>% map(., seq) %>% flatten_int(), sep = "-") %>%
+    c(variable, .)
   
 }
 
@@ -70,7 +71,7 @@ transform_data <- function(data, group = group, method = "log2"){
   
 }
 
-impute_imp4p <- function(data, group = group, method = "log2"){
+impute_imp4p <- function(data, group = group){
   # Set RNG state
   set.seed(123)
   
@@ -92,12 +93,7 @@ impute_imp4p <- function(data, group = group, method = "log2"){
   
   # Impute rows with only zeros in at least one condition
   temp.data <- impute.pa(temp.data, membership, q.norm = 0)
-  
-  # Package 'imp4p' intended for log2-transformed data and may impute negative values
-  if (method == "asinh"){
-    temp.data$tab.imp <- abs(temp.data$tab.imp)
-    
-  }
+
   # Write onto original data
   data[, unlist(group)] <- data.frame(temp.data$tab.imp)
   
