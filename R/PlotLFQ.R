@@ -1,15 +1,3 @@
-rename_compare <- function(data, num.cond, names){
-  for (x in 1:num.cond){
-    
-    
-  }
-  
-  data %>%
-    gather()
-  
-}
-
-
 plot_corr <- function(data, group = group) {
   # load required packages
   require(GGally, quietly = TRUE)
@@ -23,9 +11,9 @@ plot_corr <- function(data, group = group) {
 }
 
 
-plot_volcano <- function(data, group = group, fdr = TRUE, threshold = 2, xlimit = 10, ylimit = 6){
+plot_volcano <- function(data3, group = group, fdr = TRUE, threshold = 2, xlimit = 10, ylimit = 6){
 	# Data preparation
-  temp.data <- 	data %>%
+  temp.data <- 	data3 %>%
 	  select(-unlist(group)) %>%
 	  gather(compare, value, -1) %>%
 	  separate(compare,
