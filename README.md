@@ -17,7 +17,7 @@
 * [One-way ANOVA](https://)
 
 
-# *`AnnotLFQ`*
+# *`AnnotateLFQ`*
 
 **###**
 
