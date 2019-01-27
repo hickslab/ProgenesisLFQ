@@ -20,6 +20,8 @@ rename_columns <- function(df, group = group){
     paste(., group %>% map(., seq) %>% flatten_int(), sep = "-") %>%
     c(variable, .)
   
+  return(df)
+  
 }
 
 
