@@ -119,8 +119,7 @@ get_identifier_phospho <- function(data, database){
   # Map modified residue by position
   temp.data <- temp.data %>%
     rowwise() %>%
-    mutate(Residue = str_sub(Sequence, Identifier, Identifier) %>%
-             list())
+    mutate(Residue = str_sub(Sequence, Identifier, Identifier) %>% list())
   
   # Map position of peptide to protein
   temp.data <- temp.data %>%

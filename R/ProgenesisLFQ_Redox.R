@@ -130,7 +130,7 @@ get_identifier_redox <- function(data, database, reduced = "IAM"){
   } else if (reduced == "NEM"){
     mod <- "Nethylmaleimide"
     
-  }  
+  }
   
   # Map integer position of modification
   temp.data <- data %>%
@@ -139,19 +139,14 @@ get_identifier_redox <- function(data, database, reduced = "IAM"){
              lapply(., str_extract, "(?<=\\[)(.*)(?=\\])") %>%
              lapply(., as.numeric))
   
-  # Group row-wise
-  temp.data <- temp.data %>%
-    rowwise()
-  
   # Map position of residue to peptide
   temp.data <- temp.data %>%
-    mutate(Residue = str_locate_all(Sequence, "C")[[1]][, 1] %>%
-             list())
+    rowwise() %>%
+    mutate(Residue = str_locate_all(Sequence, "C")[[1]][, 1] %>% list())
   
   # Map unmodified position of residue on peptide
   temp.data <- temp.data %>%
-    mutate(Residue = setdiff(Residue, Modified) %>%
-             list())
+    mutate(Residue = setdiff(Residue, Modified) %>% list())
   
   # Map position of peptide to protein
   temp.data <- temp.data %>%
@@ -160,6 +155,7 @@ get_identifier_redox <- function(data, database, reduced = "IAM"){
   # Build identifier
   temp.data <- temp.data %>%
     mutate(Identifier = (Residue + Start - 1) %>%
+             paste("C", ., sep = "") %>%
              paste(., collapse = "-") %>%
              paste(Accession, ., sep = "--"))
   
