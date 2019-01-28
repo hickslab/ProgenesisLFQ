@@ -179,7 +179,43 @@ calculate_ttest <- function(data2, group.compare, fdr = TRUE){
 }
 
 
-calculate_fc <- function(data, group.compare = group.compare, method = "log2", difference = TRUE){
+calculate_1anova <- function(data2){
+  variable <- data2 %>%
+    select(1) %>%
+    names()
+  
+  # Format
+  temp.data <- data2 %>%
+    gather(condition, abundance, -1) %>%
+    rowwise() %>%
+    mutate(condition = str_split(condition, "-")[[1]][1]) %>%
+    ungroup() %>%
+    group_by_(variable) %>%
+    select(-1)
+  
+  # Nest and test
+  temp.data <- temp.data %>%
+    nest() %>%
+    mutate(aov = map(data, ~ aov(condition ~ abundance, data = .x)),
+           summary = map(aov, tidy))
+  
+  # Unnest and adjust FDR
+  temp.data <- temp.data %>%
+    unnest(summary) %>%
+    filter(term == "abundance") %>%
+    mutate(fdr = p.adjust(p.value, method = "BH", n = length(p.value)))
+  
+  # Join to data
+  temp.data <- temp.data %>%
+    select(1, p.value, fdr) %>%
+    left_join(data2, ., by = variable)
+  
+  # Exit
+  return(temp.data)
+  
+}
+
+calculate_fc <- function(data, group.compare, method = "log2", difference = TRUE){
   for (x in group.compare){
     temp.data <- data
     
