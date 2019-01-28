@@ -14,20 +14,20 @@
 
 **Statistical workflow for differential analysis. Takes ProgenesisLFQ output in simple format (variable column followed by abundance values). The following tests are available:**
 
-* [Pairwise *t*-test](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/StatLFQ.R)
+* [Pairwise *t*-test](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/StatLFQ.R)
   
-* [One-way ANOVA](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/StatLFQ.R)
+* [One-way ANOVA](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/StatLFQ.R)
 
 
 # *`AnnotateLFQ`*
 
-* [Remove PACid](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/AnnotateLFQ.R))
+* [Remove PACid](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/AnnotateLFQ.R)
 
-* [KEGG](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/AnnotateLFQ.R))
+* [KEGG](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/AnnotateLFQ.R)
 
-* [GO](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/AnnotateLFQ.R))
+* [GO](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/AnnotateLFQ.R)
 
 
 # *`PlotLFQ`*
 
-* [PCA](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/PlotLFQ.R))
+* [PCA](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/PlotLFQ.R)
