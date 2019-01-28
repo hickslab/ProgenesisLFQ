@@ -9,7 +9,7 @@ load_simple <- function(name, type = ".csv"){
 }
 
 
-rename_columns <- function(df, group = group){
+rename_columns <- function(df, group){
   variable <- df %>%
     select(1) %>%
     names()
@@ -104,7 +104,7 @@ impute_imp4p <- function(data, group = group){
 }
 
 
-calculate_ttest <- function(data, group.compare = group.compare, fdr = TRUE){
+calculate_ttest <- function(data2, group.compare, fdr = TRUE){
   # @TODO
   
   # Dataframe with only variable column to build upon
@@ -126,8 +126,8 @@ calculate_ttest <- function(data, group.compare = group.compare, fdr = TRUE){
   for (x in group.compare){
     # Row-wise t-test
     p.ttest <- c()
-    for (i in 1:nrow(data)){
-      row <- data[i, ]
+    for (i in 1:nrow(data2)){
+      row <- data2[i, ]
       
       ttest.out <- t.test(row[, x[[1]]],
                           row[, x[[2]]],
@@ -135,6 +135,7 @@ calculate_ttest <- function(data, group.compare = group.compare, fdr = TRUE){
                           var.equal = TRUE)
       
       p.ttest[i] <- ttest.out$p.value
+      
     }
     
     if (fdr == TRUE){
@@ -143,33 +144,37 @@ calculate_ttest <- function(data, group.compare = group.compare, fdr = TRUE){
       
     }
     # Add to dataframe
-    data <- cbind(data, temp.name = p.ttest)
+    data2 <- cbind(data2, temp.name = p.ttest)
     
     
     # Column name defined by group.compare variable and 'get_design' nomenclature
-    temp1 <- data %>%
+    temp1 <- data2 %>%
       select(x[[1]][1]) %>%
       names() %>%
-      str_sub(., start = 1, end = 1)
-    
-    temp2 <- data %>%
+      #str_sub(., start = 1, end = 1)
+      str_split(., "-", 2) %>% .[[1]] %>% .[1]
+      
+    temp2 <- data2 %>%
       select(x[[2]][1]) %>%
       names() %>%
-      str_sub(., start = 1, end = 1)
+      #str_sub(., start = 1, end = 1)
+      str_split(., "-", 2) %>% .[[1]] %>% .[1]
     
     if (fdr == TRUE){
-      temp.name <- paste(temp1, temp2, "_FDR", sep = "")
+      #temp.name <- paste(temp1, temp2, "_FDR", sep = "-")
+      temp.name <- paste(temp1, temp2, sep = "-") %>% paste(., "FDR", sep = "_")
       
     } else {
-      temp.name <- paste(temp1, temp2, "_P", sep = "")
+      #temp.name <- paste(temp1, temp2, "_P", sep = "-")
+      temp.name <- paste(temp1, temp2, sep = "-") %>% paste(., "P", sep = "_")
       
     }
     
     # Rename appended column with dynamic variable
-    names(data)[names(data) == "temp.name"] <- temp.name
+    names(data2)[names(data2) == "temp.name"] <- temp.name
     
   }
-  return(data)
+  return(data2)
   
 }
 
@@ -203,14 +208,17 @@ calculate_fc <- function(data, group.compare = group.compare, method = "log2", d
     temp1 <- data %>%
       select(x[[1]][1]) %>%
       names() %>%
-      str_sub(., start = 1, end = 1)
+      #str_sub(., start = 1, end = 1)
+      str_split(., "-", 2) %>% .[[1]] %>% .[1]
     
     temp2 <- data %>%
       select(x[[2]][1]) %>%
       names() %>%
-      str_sub(., start = 1, end = 1)
+      #str_sub(., start = 1, end = 1)
+      str_split(., "-", 2) %>% .[[1]] %>% .[1]
     
-    temp.name <- paste(temp1, temp2, "_FC", sep = "")
+    #temp.name <- paste(temp1, temp2, "_FC", sep = "")
+    temp.name <- paste(temp1, temp2, sep = "-") %>% paste(., "FC", sep = "_")
     
     
     # Rename appended column with dynamic variable
