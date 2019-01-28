@@ -1,12 +1,3 @@
-# Check for necessary packages
-library(tidyverse)
-
-
-load_simple <- function(name){
-  data <- read.csv(name, stringsAsFactors = FALSE)
-  
-}
-
 
 exchange_gene <- function(data, variable, organism){
   # Details: https://www.uniprot.org/help/api_queries
@@ -89,14 +80,54 @@ exchange_gene <- function(data, variable, organism){
 }
 
 
-add_accession <- function(data){
-  temp.data <- data %>%
+remove_PACid <- function(data){
+  variable <- data %>%
+    select(1) %>%
+    names()
+  
+  if (variable == "Accession"){
+    # Conditional split and return of first element
+    temp.data <- data %>%
+      rowwise() %>%
+      mutate(Accession = if_else(condition = str_detect(Accession, "Cre"),
+                                 true = str_split(Accession, pattern = "\\|")[[1]][1],
+                                 false = Accession))
+    
+  } else if (variable == "Identifier"){
+    # Separate accession from modification sites
+    temp.data <- data %>%
+      separate(Identifier,
+               into = c("Accession", "Sites"),
+               sep = "--")
+    
+    # Conditional split and return of first element
+    temp.data <- temp.data %>%
+      rowwise() %>%
+      mutate(Accession = if_else(condition = str_detect(Accession, "Cre"),
+                                 true = str_split(Accession, pattern = "\\|")[[1]][1],
+                                 false = Accession))
+    
+    # Rebuild identifier
+    temp.data <- temp.data %>%
+      unite(col = "Identifier",
+            Accession,
+            Sites,
+            sep = "--")
+    
+  }
+  # Exit
+  return(temp.data)
+  
+}
+
+
+split_identifier <- function(df){
+  temp.data <- df %>%
     separate(Identifier,
              into = c("Accession", "Sites"),
              sep = "--",
              remove = FALSE) %>%
-    select(-Sites) %>%
-    select(-Accession, Accession)
+    select(-Accession, -Sites, everything())
   
 }
 
@@ -161,28 +192,14 @@ add_missingness <- function(data, raw, variable){
 }
 
 
-add_phytozome <- function(data){
-  # Load annotation file from Phytozome
-  annotation <- read_delim("Z:/Lab_Members/Evan/Database/Cr_chlamydomonas/phytozome_v11/Creinhardtii/annotation/Creinhardtii_281_v5.5.annotation_info.txt",
-                          delim = "\t",
-                          col_types = cols())
+add_phytozome <- function(df, path){
+  # Load Phytozome annotations
+  temp.data <- read_delim(path, delim = "\t", col_types = cols()) %>%
+    mutate(Accession = peptideName)
   
-  # Select particular columns and rename
-  temp.annotation <- annotation %>%
-    select(peptideName,
-           Pfam,
-           Panther,
-           KO,
-           GO,
-           "Best-hit-arabi-name",
-           "arabi-symbol",
-           "arabi-defline") %>%
-    rename(Accession = peptideName)
-  
-  # Join annotation columns onto data
-  temp.data <- data %>%
-    left_join(., temp.annotation, by = "Accession")
-    
+  # Join onto input data
+  temp.data <- temp.data %>%
+    left_join(df, ., by = "Accession")
   
 }
 

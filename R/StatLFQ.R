@@ -187,11 +187,11 @@ calculate_1anova <- function(data2){
   # Format
   temp.data <- data2 %>%
     gather(condition, abundance, -1) %>%
-    rowwise() %>%
-    mutate(condition = str_split(condition, "-")[[1]][1]) %>%
-    ungroup() %>%
-    group_by_(variable) %>%
-    select(-1)
+    #rowwise() %>%
+    #mutate(condition = str_split(condition, "-")[[1]][1]) %>% tail
+    #ungroup() %>%
+    separate(condition, into = c("condition", "replicate"), sep = "-") %>%
+    group_by_(variable)
   
   # Nest and test
   temp.data <- temp.data %>%
@@ -266,4 +266,19 @@ calculate_fc <- function(data, group.compare, method = "log2", difference = TRUE
 }
 
 
-
+maximum_FC <- function(data4){
+  variable <- data4 %>%
+    select(1) %>%
+    names()
+  
+  data4 %>%
+    select(1, contains("_FC")) %>%
+    gather(condition, value, -1) %>%
+    #separate(condition, into = c("condition", "type"), sep = "_") %>%
+    group_by_(variable) %>%
+    summarize(maximum_FC = if_else(max(value) > abs(min(value)),
+                                   true = max(value),
+                                   false = min(value))) %>%
+    left_join(data4, ., by = variable) %>% View
+  
+}

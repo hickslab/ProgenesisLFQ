@@ -1,12 +1,14 @@
 plot_corr <- function(data, group = group) {
-  # load required packages
-  require(GGally, quietly = TRUE)
+  # Load packages
+  library(broom)
   
-  temp.data <- data %>%
-    select(unlist(group))
-  
-  ggcorr(temp.data,
-         label = TRUE)
+  data2 %>%
+    select(-1) %>%
+    cor() %>%
+    tidy() %>%
+    gather(replicate, cor, -.rownames) %>%
+    ggplot(., aes(x = .rownames, y = replicate, fill = cor)) +
+    geom_tile()
   
 }
 
@@ -111,8 +113,8 @@ plot_hclust <- function(df, group, k = 5){
   
   # Plot
   temp.data %>%
-    #ggplot(., aes(x = cond, y = scaled)) + geom_boxplot(outlier.shape = NA) +
-    ggplot(., aes(x = condition, y = scaled, group = rowname, color = factor(clustered))) + geom_line() +
+    ggplot(., aes(x = condition, y = scaled)) + geom_boxplot(outlier.shape = NA) +
+    #ggplot(., aes(x = condition, y = scaled, group = rowname, color = factor(clustered))) + geom_line() +
     
     facet_wrap(~ clustered_count) +
     
