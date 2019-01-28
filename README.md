@@ -21,13 +21,13 @@
 
 # *`AnnotateLFQ`*
 
-* [Remove PACid]([One-way ANOVA](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/AnnotateLFQ.R))
+* [Remove PACid](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/AnnotateLFQ.R))
 
-* [KEGG]([One-way ANOVA](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/AnnotateLFQ.R))
+* [KEGG](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/AnnotateLFQ.R))
 
-* [GO]([One-way ANOVA](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/AnnotateLFQ.R))
+* [GO](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/AnnotateLFQ.R))
 
 
 # *`PlotLFQ`*
 
-* [PCA]([One-way ANOVA](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/PlotLFQ.R))
+* [PCA](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/PlotLFQ.R))
