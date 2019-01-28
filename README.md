@@ -1,6 +1,7 @@
 # *`ProgenesisLFQ`*
 
 **This repository contains functions to process Progenesis QI for proteomics v2.0 data. Download a workflow file depending on your application and open it in RStudio to edit/run. Find '###' in the workflows and update with your particular filename/path before running. The following data files are needed:**
+
 * Protein measurements:
   + [Global proteomics](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/ProgenesisLFQ_Global_Workflow.R)
   
@@ -12,16 +13,21 @@
 # *`StatLFQ`*
 
 **Statistical workflow for differential analysis. Takes ProgenesisLFQ output in simple format (variable column followed by abundance values). The following tests are available:**
-* [Pairwise *t*-test](https://)
+
+* [Pairwise *t*-test](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/StatLFQ.R)
   
-* [One-way ANOVA](https://)
+* [One-way ANOVA](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/StatLFQ.R)
 
 
 # *`AnnotateLFQ`*
 
-**###**
+* [Remove PACid]([One-way ANOVA](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/AnnotateLFQ.R))
+
+* [KEGG]([One-way ANOVA](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/AnnotateLFQ.R))
+
+* [GO]([One-way ANOVA](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/AnnotateLFQ.R))
 
 
 # *`PlotLFQ`*
 
-**###**
+* [PCA]([One-way ANOVA](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/PlotLFQ.R))
