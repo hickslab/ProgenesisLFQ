@@ -266,19 +266,18 @@ calculate_fc <- function(data, group.compare, method = "log2", difference = TRUE
 }
 
 
-maximum_FC <- function(data4){
+add_maximum_fc <- function(data4){
   variable <- data4 %>%
     select(1) %>%
     names()
   
-  data4 %>%
+  temp.data <- data4 %>%
     select(1, contains("_FC")) %>%
     gather(condition, value, -1) %>%
-    #separate(condition, into = c("condition", "type"), sep = "_") %>%
     group_by_(variable) %>%
     summarize(maximum_FC = if_else(max(value) > abs(min(value)),
                                    true = max(value),
                                    false = min(value))) %>%
-    left_join(data4, ., by = variable) %>% View
+    left_join(data4, ., by = variable)
   
 }

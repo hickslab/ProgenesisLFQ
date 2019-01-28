@@ -84,16 +84,6 @@ reduce_identifiers <- function(data, group){
 }
 
 
-simplify_cols <- function(data, variable, group){
-  temp.data <- data %>%
-    select(variable) #either "Identifier" or "Accession"
-  
-  data[, unlist(group)] %>%
-    bind_cols(temp.data, .)
-  
-}
-
-
 get_identifier <- function(data){
   data %>%
     mutate(Identifier = paste(Accession, Sequence, sep = "--"))

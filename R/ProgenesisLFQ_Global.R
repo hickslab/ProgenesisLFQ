@@ -30,16 +30,6 @@ split_group <- function(data){
 }
 
 
-simplify_cols <- function(data, variable, group){
-  temp.data <- data %>%
-    select(variable)
-  
-  data[, unlist(group)] %>%
-    bind_cols(temp.data, .)
-  
-}
-
-
 remove_PACid <- function(data, variable){
   if (variable == "Accession"){
     # Conditional split and return of first element
