@@ -11,7 +11,7 @@ plot_corr <- function(data, group = group) {
 }
 
 
-plot_volcano <- function(data3, group = group, fdr = TRUE, threshold = 2, xlimit = 10, ylimit = 6){
+plot_volcano <- function(data3, group, fdr = FALSE, threshold = 2, xlimit = 10, ylimit = 6){
 	# Data preparation
   temp.data <- 	data3 %>%
 	  select(-unlist(group)) %>%
@@ -26,11 +26,11 @@ plot_volcano <- function(data3, group = group, fdr = TRUE, threshold = 2, xlimit
   # Check if FDR-adjustment was applied
   if (fdr == TRUE){
     temp.data <- temp.data %>%
-      rename(significance = FDR)
+      mutate(significance = FDR)
     
   } else {
     temp.data <- temp.data %>%
-      rename(significance = P)
+      mutate(significance = P)
     
   }
   
@@ -70,18 +70,33 @@ plot_volcano <- function(data3, group = group, fdr = TRUE, threshold = 2, xlimit
 }
 
 
-plot_heatmap <- function(data, group = group){
-  temp.data <- data
+plot_hclust <- function(df, group, k = 5){
+  # Select abundance columns
+  temp.data <- df %>%
+    select(1, group %>% flatten_int())
   
-  temp.data[unlist(group)] <- temp.data[unlist(group)] %>%
+  temp.data <- temp.data %>%
+    gather(replicate, abundance, -1) %>%
+    separate(replicate, into = c("condition", "replicate"), sep = "-") %>%
+    group_by(.[[1]], condition) %>%
+    summarize(mean = mean(abundance)) %>%
+    ungroup() %>%
+    spread(., condition, mean)
+  
+    
+  # Z-score rowwise normalization
+  temp.data[-1] <- temp.data %>%
+    select(-1) %>%
     apply(., 1, scale) %>%
     t()
   
-  temp.data <- data %>%
-    select(unlist(group)) %>%
+  temp.data <- temp.data %>%
+    #select(unlist(group)) %>%
+    select(-1) %>%
+    
     mutate(clustered = dist(.) %>%
              hclust() %>%
-             cutree(4)) %>%
+             cutree(k)) %>%
     
     mutate(clustered = LETTERS[clustered]) %>%
     
@@ -91,26 +106,27 @@ plot_heatmap <- function(data, group = group){
     
     rownames_to_column() %>%
     
-    gather(cond, scaled, unlist(group))
+    gather(condition, scaled, -rowname, -clustered, -clustered_count)
   
   
   # Plot
   temp.data %>%
     #ggplot(., aes(x = cond, y = scaled)) + geom_boxplot(outlier.shape = NA) +
-    ggplot(., aes(x = cond, y = scaled, group = rowname, color = factor(clustered))) + geom_line() +
+    ggplot(., aes(x = condition, y = scaled, group = rowname, color = factor(clustered))) + geom_line() +
     
     facet_wrap(~ clustered_count) +
     
     labs(x = "Condition", y = "Z-score") +
     
-    #scale_x_discrete(labels = c("TAP", "-N", "-C", "-P")) +
-    
     guides(color = FALSE) +
     
     theme_bw(base_size = 16)
   
-  
-  
+}
+ 
+
+plot_heatmap <- function(df){
+
   temp.data %>%
     ggplot(., aes(variable, reorder(Identifier, -value))) +
     #ggplot(., aes(variable, Identifier)) +
@@ -123,14 +139,15 @@ plot_heatmap <- function(data, group = group){
 }
 
 
-plot_pca <- function(data2){
-  data2 %>%
+plot_pca <- function(df){
+  df %>%
     select(-1) %>%
     prcomp() %>%
     .$rotation %>%
     data.frame() %>%
     rownames_to_column() %>%
-    mutate(condition = str_sub(rowname, end = -2)) %>%
+    #mutate(condition = str_sub(rowname, end = -2)) %>%
+    separate(rowname, into = c("condition", "replicate"), sep = "-") %>%
     ggplot(., aes(x = PC1, y = PC2, color = condition)) +
     geom_point(size = 5)
   
