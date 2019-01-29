@@ -73,6 +73,14 @@ transform_data <- function(data, group = group, method = "log2"){
   
 }
 
+
+normalize_data <- function(data){
+  # Would this help following data reduction/filtering?
+  
+  
+}
+
+
 impute_imp4p <- function(data, group = group){
   # Set RNG state
   set.seed(123)
@@ -266,7 +274,7 @@ calculate_fc <- function(data, group.compare, method = "log2", difference = TRUE
 }
 
 
-add_maximum_fc <- function(data4){
+add_max_fc <- function(data4){
   variable <- data4 %>%
     select(1) %>%
     names()
@@ -275,7 +283,7 @@ add_maximum_fc <- function(data4){
     select(1, contains("_FC")) %>%
     gather(condition, value, -1) %>%
     group_by_(variable) %>%
-    summarize(maximum_FC = if_else(max(value) > abs(min(value)),
+    summarize(max_FC = if_else(max(value) > abs(min(value)),
                                    true = max(value),
                                    false = min(value))) %>%
     left_join(data4, ., by = variable)
