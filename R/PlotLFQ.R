@@ -13,7 +13,7 @@ plot_corr <- function(data, group = group) {
 }
 
 
-plot_volcano <- function(data3, group, fdr = FALSE, threshold = 2, xlimit = 10, ylimit = 6){
+plot_volcano <- function(data3, group, fdr = TRUE, threshold = 2, xlimit = 10, ylimit = 6){
 	# Data preparation
   temp.data <- 	data3 %>%
 	  select(-unlist(group)) %>%
@@ -55,6 +55,7 @@ plot_volcano <- function(data3, group, fdr = FALSE, threshold = 2, xlimit = 10, 
     inner_join(temp.data, ., by = "compare")
 	
 	# Plot
+  # TODO fails if no matches for down/up
 	temp.data %>%
 	  ggplot(., aes(x = FC, y = -log10(significance), color = type)) +
 	  geom_point() +
@@ -116,7 +117,7 @@ plot_hclust <- function(df, group, k = 5){
     ggplot(., aes(x = condition, y = scaled)) + geom_boxplot(outlier.shape = NA) +
     #ggplot(., aes(x = condition, y = scaled, group = rowname, color = factor(clustered))) + geom_line() +
     
-    facet_wrap(~ clustered_count) +
+    facet_grid(~ clustered_count) +
     
     labs(x = "Condition", y = "Z-score") +
     
@@ -151,6 +152,7 @@ plot_pca <- function(df){
     #mutate(condition = str_sub(rowname, end = -2)) %>%
     separate(rowname, into = c("condition", "replicate"), sep = "-") %>%
     ggplot(., aes(x = PC1, y = PC2, color = condition)) +
+    theme(text = element_text(size = 16)) +
     geom_point(size = 5)
   
 }
