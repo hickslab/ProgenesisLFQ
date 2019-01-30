@@ -114,8 +114,8 @@ plot_hclust <- function(df, group, k = 5){
   
   # Plot
   temp.data %>%
-    ggplot(., aes(x = condition, y = scaled)) + geom_boxplot(outlier.shape = NA) +
-    #ggplot(., aes(x = condition, y = scaled, group = rowname, color = factor(clustered))) + geom_line() +
+    #ggplot(., aes(x = condition, y = scaled)) + geom_boxplot(outlier.shape = NA) +
+    ggplot(., aes(x = condition, y = scaled, group = rowname, color = factor(clustered))) + geom_line() +
     
     facet_grid(~ clustered_count) +
     
