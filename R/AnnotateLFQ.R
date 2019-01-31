@@ -1,4 +1,3 @@
-
 exchange_gene <- function(data, variable, organism){
   # Details: https://www.uniprot.org/help/api_queries
   # Columns: https://www.uniprot.org/help/uniprotkb_column_names
@@ -121,6 +120,41 @@ remove_PACid <- function(data){
 }
 
 
+keep_entry_uniprot <- function(df){
+  variable <- df %>%
+    select(1) %>%
+    names()
+  
+  if (variable == "Accession"){
+    # Split and return UniProt entry
+    temp.data <- df %>%
+      mutate(Accession = str_split(Accession, pattern = "\\|", simplify = TRUE)[, 2])
+    
+  } else if (variable == "Identifier"){
+    # Separate accession from modification sites
+    temp.data <- df %>%
+      separate(Identifier,
+               into = c("Accession", "Sites"),
+               sep = "--")
+    
+    # Split and return UniProt entry
+    temp.data <- temp.data %>%
+      mutate(Accession = str_split(Accession, "\\|", simplify = TRUE)[, 2])
+    
+    # Rebuild identifier
+    temp.data <- temp.data %>%
+      unite(col = "Identifier",
+            Accession,
+            Sites,
+            sep = "--")
+    
+  }
+  # Exit
+  return(temp.data)
+  
+}
+
+
 split_identifier <- function(df){
   temp.data <- df %>%
     separate(Identifier,
@@ -204,3 +238,37 @@ add_phytozome <- function(df, path){
 }
 
 
+add_uniprot <- function(df, path){
+  temp.data <- read_delim(path, delim = "\t", col_types = cols())
+  
+  temp.data %>%
+    sample_n(., 1000, replace = FALSE) %>%
+    select(contains("Gene ontology"))%>%
+    gather(column, term) %>%
+    separate_rows(term, sep = "; ") %>%
+    filter(!is.na(term)) %>%
+    group_by(column, term) %>%
+    summarize(count = n()) %>%
+    group_by(column) %>%
+    top_n(10, count) %>%
+    #slice(1:n())
+    
+    #ggplot(., aes(x = count, fill = column)) + geom_histogram(binwidth = 1) + coord_cartesian(xlim = c(0, 100))
+    
+    #ggplot(., aes(x = reorder(term, count), y = count, color = column)) + geom_point() + coord_flip()
+    
+    ggplot(., aes(x = reorder(term, -count), y = count, fill = column)) + geom_bar(stat = "identity") + coord_flip()
+    
+}
+
+
+pull_uniprot(output = "Cr_uniprot_20190130_annotation.tsv"){
+  path <- "https://www.uniprot.org/uniprot/?query=proteome%3AUP000006906&columns=id%2Centry%20name%2Cprotein%20names%2Cgenes%2Clength%2Cfeature(ACTIVE%20SITE)%2Cfeature(BINDING%20SITE)%2Ccomment(CATALYTIC%20ACTIVITY)%2Cfeature(METAL%20BINDING)%2Cgo(biological%20process)%2Cgo(cellular%20component)%2Cgo(molecular%20function)%2Ccomment(SUBCELLULAR%20LOCATION)%2Cfeature(DISULFIDE%20BOND)%2Ccomment(POST-TRANSLATIONAL%20MODIFICATION)%2Cdatabase(STRING)%2Cdatabase(KEGG)%2Cdatabase(GeneID)%2Cdatabase(KO)%2Cdatabase(Pfam)%2Ccomment(PATHWAY)%2Cdatabase(InterPro)%2Cdatabase(PhosphoSitePlus)&format=tab"
+  
+  # Pull table from UniProt URL
+  temp.data <- read_delim(path, delim = "\t", col_types = cols())
+  
+  # Write table to local file
+  #write_tsv(temp.data, output)
+  
+}
