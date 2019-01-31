@@ -153,7 +153,8 @@ plot_pca <- function(df){
     separate(rowname, into = c("condition", "replicate"), sep = "-") %>%
     ggplot(., aes(x = PC1, y = PC2, color = condition)) +
     theme(text = element_text(size = 16)) +
-    geom_point(size = 5)
+    geom_point(size = 5) +
+    c
   
 }
 
