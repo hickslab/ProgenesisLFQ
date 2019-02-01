@@ -13,6 +13,23 @@ plot_corr <- function(data, group = group) {
 }
 
 
+plot_pca <- function(df){
+  df %>%
+    select(-1) %>%
+    prcomp() %>%
+    .$rotation %>%
+    data.frame() %>%
+    rownames_to_column() %>%
+    #mutate(condition = str_sub(rowname, end = -2)) %>%
+    separate(rowname, into = c("condition", "replicate"), sep = "-") %>%
+    ggplot(., aes(x = PC1, y = PC2, color = condition)) +
+    theme(text = element_text(size = 16)) +
+    geom_point(size = 5) +
+    c
+  
+}
+
+
 plot_volcano <- function(data3, group, fdr = TRUE, threshold = 2, xlimit = 10, ylimit = 6){
 	# Data preparation
   temp.data <- 	data3 %>%
@@ -142,19 +159,24 @@ plot_heatmap <- function(df){
 }
 
 
-plot_pca <- function(df){
-  df %>%
-    select(-1) %>%
-    prcomp() %>%
-    .$rotation %>%
-    data.frame() %>%
-    rownames_to_column() %>%
-    #mutate(condition = str_sub(rowname, end = -2)) %>%
-    separate(rowname, into = c("condition", "replicate"), sep = "-") %>%
-    ggplot(., aes(x = PC1, y = PC2, color = condition)) +
-    theme(text = element_text(size = 16)) +
-    geom_point(size = 5) +
-    c
+plot_GO_uniprot <- function(data5, n = 5){
+  data5 %>%
+    #sample_n(., 1000, replace = FALSE) %>%
+    select(contains("Gene ontology"))%>%
+    gather(column, term) %>%
+    separate_rows(term, sep = "; ") %>%
+    filter(!is.na(term)) %>%
+    group_by(column, term) %>%
+    summarize(count = n()) %>%
+    group_by(column) %>%
+    top_n(n, count) %>%
+    #slice(1:n())
+    
+    #ggplot(., aes(x = count, fill = column)) + geom_histogram(binwidth = 1) + coord_cartesian(xlim = c(0, 100))
+    
+    #ggplot(., aes(x = reorder(term, count), y = count, color = column)) + geom_point() + coord_flip()
+    
+    ggplot(., aes(x = reorder(term, -count), y = count, fill = column)) + geom_bar(stat = "identity") + coord_flip()
   
 }
 
