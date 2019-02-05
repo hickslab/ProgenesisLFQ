@@ -24,8 +24,7 @@ plot_pca <- function(df){
     separate(rowname, into = c("condition", "replicate"), sep = "-") %>%
     ggplot(., aes(x = PC1, y = PC2, color = condition)) +
     theme(text = element_text(size = 16)) +
-    geom_point(size = 5) +
-    c
+    geom_point(size = 5)
   
 }
 
@@ -159,24 +158,44 @@ plot_heatmap <- function(df){
 }
 
 
-plot_GO_uniprot <- function(data5, n = 5){
-  data5 %>%
+plot_GO_uniprot <- function(df, top = 5){
+  # Select GO columns
+  df %>%
+    #filter(fdr < 0.05) %>%
     #sample_n(., 1000, replace = FALSE) %>%
-    select(contains("Gene ontology"))%>%
+    select(contains("Gene ontology")) %>%
+    
+    # Melt GO
     gather(column, term) %>%
-    separate_rows(term, sep = "; ") %>%
+    mutate(column = str_split(column, "\\(", simplify = TRUE)[, 2] %>% str_sub(., end = -2)) %>%
+    
+    # Clean terms
     filter(!is.na(term)) %>%
+    separate_rows(term, sep = "; ") %>%
+    #separate(term, into = c("term", "GO"), sep = "\\[", extra = "merge") %>% View
+    mutate(term = str_sub(term, end = -14)) %>%
+    #mutate(GO = str_sub(GO, end = -2)) %>%
+    
+    # Count terms
     group_by(column, term) %>%
-    summarize(count = n()) %>%
+    tally() %>%
+    
+    # Filter for top terms
     group_by(column) %>%
-    top_n(n, count) %>%
+    top_n(top, n) %>%
     #slice(1:n())
     
     #ggplot(., aes(x = count, fill = column)) + geom_histogram(binwidth = 1) + coord_cartesian(xlim = c(0, 100))
     
     #ggplot(., aes(x = reorder(term, count), y = count, color = column)) + geom_point() + coord_flip()
     
-    ggplot(., aes(x = reorder(term, -count), y = count, fill = column)) + geom_bar(stat = "identity") + coord_flip()
+    ggplot(., aes(x = reorder(term, -n), y = n, fill = column)) +
+    geom_bar(stat = "identity") +
+    coord_flip() +
+    facet_grid(column ~ ., scales = "free") +
+    guides(fill = FALSE) +
+    labs(x = NULL, y = "Proteins") +
+    theme(text = element_text(size = 16))
   
 }
 
