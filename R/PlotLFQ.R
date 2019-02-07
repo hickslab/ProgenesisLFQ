@@ -13,18 +13,20 @@ plot_corr <- function(data, group = group) {
 }
 
 
-plot_pca <- function(df){
-  df %>%
-    select(-1) %>%
+plot_pca <- function(df, group){
+  temp.data <- df %>%
+    select(group %>% flatten_int())
+  
+  temp.data %>%
     prcomp() %>%
     .$rotation %>%
     data.frame() %>%
     rownames_to_column() %>%
-    #mutate(condition = str_sub(rowname, end = -2)) %>%
     separate(rowname, into = c("condition", "replicate"), sep = "-") %>%
-    ggplot(., aes(x = PC1, y = PC2, color = condition)) +
+    ggplot(., aes(x = PC1, y = PC2, color = condition, label = replicate)) +
     theme(text = element_text(size = 16)) +
-    geom_point(size = 5)
+    geom_point(size = 8) +
+    geom_text(color = "black")
   
 }
 
@@ -130,14 +132,13 @@ plot_hclust <- function(df, group, k = 5){
   
   # Plot
   temp.data %>%
-    #ggplot(., aes(x = condition, y = scaled)) + geom_boxplot(outlier.shape = NA) +
-    ggplot(., aes(x = condition, y = scaled, group = rowname, color = factor(clustered))) + geom_line() +
+    #ggplot(., aes(x = condition, y = scaled, fill = factor(clustered))) + geom_boxplot(outlier.shape = NA) + guides(fill = FALSE) + #scale_fill_brewer(palette = "Set1") 
+    #ggplot(., aes(x = condition, y = scaled, group = rowname, color = factor(clustered))) + geom_line() + guides(color = FALSE) + #scale_color_brewer(palette = "Pastel1") +
+    ggplot(., aes(x = condition, y = scaled)) + geom_line(group = 2) +# geom_smooth(method = "loess") +
     
-    facet_grid(~ clustered_count) +
+    facet_wrap(~ clustered_count) +
     
     labs(x = "Condition", y = "Z-score") +
-    
-    guides(color = FALSE) +
     
     theme_bw(base_size = 16)
   
@@ -189,7 +190,7 @@ plot_GO_uniprot <- function(df, top = 5){
     
     #ggplot(., aes(x = reorder(term, count), y = count, color = column)) + geom_point() + coord_flip()
     
-    ggplot(., aes(x = reorder(term, -n), y = n, fill = column)) +
+    ggplot(., aes(x = reorder(term, n), y = n, fill = column)) +
     geom_bar(stat = "identity") +
     coord_flip() +
     facet_grid(column ~ ., scales = "free") +
