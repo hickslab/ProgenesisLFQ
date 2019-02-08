@@ -223,19 +223,10 @@ calculate_1anova <- function(data2){
   
 }
 
-calculate_fc <- function(data, group.compare, method = "log2", difference = TRUE){
+calculate_fc <- function(data, group.compare, difference = TRUE){
   for (x in group.compare){
     temp.data <- data
     
-    
-    # Specify data scale based on 'method' argument
-    if (method == "log2"){
-      # Do nothing
-      
-    } else if (method == "asinh"){
-      temp.data[, unlist(x)] <- sinh(temp.data[, unlist(x)])
-      
-    }
     # Specify calculation based on 'difference' argument
     if (difference == TRUE){
       temp.fc <- rowMeans(temp.data[x[[2]]]) - rowMeans(temp.data[x[[1]]])
