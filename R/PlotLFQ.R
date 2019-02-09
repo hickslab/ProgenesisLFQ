@@ -132,9 +132,9 @@ plot_hclust <- function(df, group, k = 5){
   
   # Plot
   temp.data %>%
-    #ggplot(., aes(x = condition, y = scaled, fill = factor(clustered))) + geom_boxplot(outlier.shape = NA) + guides(fill = FALSE) + #scale_fill_brewer(palette = "Set1") 
+    ggplot(., aes(x = condition, y = scaled, fill = factor(clustered))) + geom_boxplot(outlier.shape = NA) + guides(fill = FALSE) + #scale_fill_brewer(palette = "Set1") 
     #ggplot(., aes(x = condition, y = scaled, group = rowname, color = factor(clustered))) + geom_line() + guides(color = FALSE) + #scale_color_brewer(palette = "Pastel1") +
-    ggplot(., aes(x = condition, y = scaled)) + geom_line(group = 2) +# geom_smooth(method = "loess") +
+    #ggplot(., aes(x = condition, y = scaled)) + geom_line(group = 2) +# geom_smooth(method = "loess") +
     
     facet_wrap(~ clustered_count) +
     
