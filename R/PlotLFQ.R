@@ -24,8 +24,9 @@ plot_pca <- function(df, group){
     rownames_to_column() %>%
     separate(rowname, into = c("condition", "replicate"), sep = "-") %>%
     ggplot(., aes(x = PC1, y = PC2, color = condition, label = replicate)) +
-    theme(text = element_text(size = 16)) +
     geom_point(size = 8) +
+    scale_color_discrete(limits = names(group)) +
+    theme(text = element_text(size = 16)) +
     geom_text(color = "black")
   
 }
@@ -132,7 +133,7 @@ plot_hclust <- function(df, group, k = 5){
   
   # Plot
   temp.data %>%
-    ggplot(., aes(x = condition, y = scaled, fill = factor(clustered))) + geom_boxplot(outlier.shape = NA) + guides(fill = FALSE) + #scale_fill_brewer(palette = "Set1") 
+    ggplot(., aes(x = condition, y = scaled, fill = factor(clustered))) + geom_boxplot(outlier.shape = NA) + guides(fill = FALSE) + scale_x_discrete(limits = names(group)) + 
     #ggplot(., aes(x = condition, y = scaled, group = rowname, color = factor(clustered))) + geom_line() + guides(color = FALSE) + #scale_color_brewer(palette = "Pastel1") +
     #ggplot(., aes(x = condition, y = scaled)) + geom_line(group = 2) +# geom_smooth(method = "loess") +
     
@@ -277,6 +278,12 @@ plot_joy <- function(data, group = group){
     xlab(expression("log"[2]*"(Abundance)")) +
     #facet_wrap(~group, scales = "free_y") +
     ylab("")
+  
+}
+
+
+plot_ROC <- function(df, group, tp, fp){
+  
   
 }
 
