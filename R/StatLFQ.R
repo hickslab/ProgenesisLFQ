@@ -112,6 +112,13 @@ impute_imp4p <- function(data, group = group){
 }
 
 
+impute_conditional <- function(df, group){
+  # In-house conditional imputation
+  # ~ data
+  
+}
+
+
 calculate_ttest <- function(data2, group.compare, fdr = TRUE){
   # @TODO
   
@@ -195,9 +202,6 @@ calculate_1anova <- function(data2){
   # Format
   temp.data <- data2 %>%
     gather(condition, abundance, -1) %>%
-    #rowwise() %>%
-    #mutate(condition = str_split(condition, "-")[[1]][1]) %>% tail
-    #ungroup() %>%
     separate(condition, into = c("condition", "replicate"), sep = "-") %>%
     group_by_(variable)
   
@@ -232,7 +236,7 @@ calculate_fc <- function(data, group.compare, difference = TRUE){
       temp.fc <- rowMeans(temp.data[x[[2]]]) - rowMeans(temp.data[x[[1]]])
       
     } else if (difference == FALSE){
-      temp.fc <- rowMeans(temp.data[x[[2]]]) / rowMeans(temp.data[x[[1]]])
+      temp.fc <- 2^rowMeans(temp.data[x[[2]]]) / 2^rowMeans(temp.data[x[[1]]])
       
     }
     # Add to dataframe
