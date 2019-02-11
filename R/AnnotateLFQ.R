@@ -166,62 +166,42 @@ split_identifier <- function(df){
 }
 
 
-add_missingness <- function(data, raw, variable){
-  if (variable == "Accession"){
-    # Filter raw data for StatLFQ passing observations
-    temp.raw <- raw %>%
-      semi_join(., data, by = "Accession")
-    
-    # Convert to long-format and summarize for complete missingness
-    temp.raw <- temp.raw %>%
-      gather(sample, value, -1) %>%
-      separate(sample,
-               into = c("condition", "replicate"),
-               sep = "[0-9]+") %>%
-      select(-replicate) %>%
-      group_by(Accession, condition) %>%
-      summarize(sum = sum(value) != 0) %>%
-      filter(sum == 0)
-    
-    # Add column with groups completely missing
-    temp.raw <- temp.raw %>%
-      group_by(Accession) %>%
-      mutate(Absent = paste(condition, collapse = "")) %>%
-      select(-condition, -sum)
-    
-    # Join missingness column onto data
-    data <- data %>%
-      left_join(., temp.raw, by = "Accession")
-    
-  } else if (variable == "Identifier"){
-      # Filter raw data for StatLFQ passing observations
-      temp.raw <- raw %>%
-        semi_join(., data, by = "Identifier")
-      
-      # Convert to long-format and summarize for complete missingness
-      temp.raw <- temp.raw %>%
-        gather(sample, value, -1) %>%
-        separate(sample,
-                 into = c("condition", "replicate"),
-                 sep = "[0-9]+") %>%
-        select(-replicate) %>%
-        group_by(Identifier, condition) %>%
-        summarize(sum = sum(value) != 0) %>%
-        filter(sum == 0)
-      
-      # Add column with groups completely missing
-      temp.raw <- temp.raw %>%
-        group_by(Identifier) %>%
-        mutate(Absent = paste(condition, collapse = "")) %>%
-        select(-condition, -sum)
-      
-      # Join missingness column onto data
-      data <- data %>%
-        left_join(., temp.raw, by = "Identifier")
-    
-  }
+add_missingness <- function(df, raw, group){
+  variable <- df %>%
+    select(1) %>%
+    names()
+  
+  # Filter raw data for StatLFQ passing observations
+  temp.raw <- raw %>%
+    semi_join(., df, by = variable)
+  
+  # Match column names
+  names(temp.raw) <- names(df)[c(1, group %>% unlist())]
+  
+  # Convert to long-format and summarize for complete missingness
+  temp.raw <- temp.raw %>%
+    gather(sample, value, -1) %>%
+    separate(sample,
+             into = c("condition", "replicate"),
+             sep = "-") %>%
+    #select(-replicate) %>%
+    group_by_(variable, "condition") %>%
+    summarize(sum = sum(value), missing = sum == 0) %>%
+    filter(missing == TRUE)
+  
+  # Add column with groups completely missing
+  temp.raw <- temp.raw %>%
+    group_by_(variable) %>%
+    mutate(Missing = paste(condition, collapse = "-")) %>%
+    distinct_(., variable, .keep_all = TRUE) %>%
+    select(variable, Missing)
+  
+  # Join missingness column onto data
+  temp.data <- df %>%
+    left_join(., temp.raw, by = variable)
+  
   # Exit
-  return(data)
+  return(temp.data)
   
 }
 
@@ -241,7 +221,7 @@ add_phytozome <- function(df, path){
 add_uniprot <- function(df, path){
   # Load UniProt annotation file
   temp.data <- read_delim(path, delim = "\t", col_types = cols()) %>%
-    mutate(Accession = Entry)
+    rename(Entry = "Accession")
   
   # Join onto input data
   temp.data <- temp.data %>%
@@ -258,5 +238,12 @@ pull_uniprot <- function(output = "Cr_uniprot_20190130_annotation.tsv"){
   
   # Write table to local file
   #write_tsv(temp.data, output)
+  
+}
+
+
+separate_sites <- function(df){
+  #data2
+  
   
 }
