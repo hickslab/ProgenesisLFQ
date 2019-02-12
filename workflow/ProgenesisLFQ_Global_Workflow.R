@@ -17,7 +17,8 @@ source_url("https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/Pr
 
 
 # Load raw data
-protm <- read_csv("https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/data/20180502_WOS52_Cr_UPS_protm.csv", col_types = cols(), skip = 2)
+protm <- "https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/data/20180502_WOS52_Cr_UPS_protm.csv" %>%
+  load_data()
 
 #protm <- "###.csv" %>% # ???
 #  load_data()
@@ -29,8 +30,8 @@ samples <- 10:21 # ???
   
 # Workflow
 data <- protm %>%
-  filter_contaminants() %>%
-  filter_peptides(peptides = 2, unique = 1) %>%
+  filter(Description != "cRAP") %>%
+  filter(Peptide.count >= 2 & Unique.peptides >= 1) %>%
   split_group() %>%
   select(Accession, samples) %>%
   data.frame()
