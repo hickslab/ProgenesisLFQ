@@ -38,8 +38,8 @@ source_url("https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/St
 
 
 # Condition indeces in data
-a <- 2:5; b <- 6:9; c <- 10:13; d <- 14:17
-group <- list("0" = a, "15" = b, "30" = c, "60" = d)
+a <- 2:5; b <- 6:9; c <- 10:13
+group <- list("25" = a, "50" = b, "100" = c)
 
 
 # Process data
@@ -58,7 +58,7 @@ data2 <- data %>%
 
 group.compare <- list(list(a, b),
                       list(a, c),
-                      list(a, d))
+                      list(b, c))
 
 
 # Process data
@@ -98,7 +98,7 @@ source_url(https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/Ann
 phytozome <- source_url("https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/data/Creinhardtii_281_v5.5.annotation_info.txt")
 
 
-data5 <- data4 %>%
+data5 <- data3 %>%
   add_missingness(., data, group) %>%
   remove_PACid() %>%
   split_identifier() %>%
