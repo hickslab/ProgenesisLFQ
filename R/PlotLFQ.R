@@ -33,7 +33,7 @@ plot_pca <- function(df, group){
 
 
 plot_volcano <- function(data3, group, fdr = TRUE, threshold = 2, xlimit = 10, ylimit = 6){
-	# Data preparation
+  # Data preparation
   temp.data <- 	data3 %>%
 	  select(-unlist(group)) %>%
 	  gather(compare, value, -1) %>%
@@ -57,28 +57,21 @@ plot_volcano <- function(data3, group, fdr = TRUE, threshold = 2, xlimit = 10, y
   
   # Set significance types
   temp.data <- temp.data %>%
-    mutate(type = if_else((FC >= log2(threshold) & significance < 0.05),
-                                  "UP",
-                                  if_else((FC <= -log2(threshold) & significance < 0.05),
-                                          "DOWN",
-                                          "SAME")))
+    mutate(down = if_else(FC <= -log2(threshold) & significance < 0.05, 1, 0),
+           up = if_else(FC >= log2(threshold) & significance < 0.05, 1, 0),
+           type = if_else(down == 1, "down", if_else(up == 1, "up", "same")))
   
-  # Build descriptive plot title
+  # Build facet titles
   temp.data <- temp.data %>%
-    filter(type != "SAME") %>%
-    group_by(compare, type) %>%
-    summarize(n = n()) %>%
-    spread(type, n) %>%
-    mutate(compare_count = paste(compare, "\nDown ", sep = "", DOWN, " / Up ", UP)) %>%
-    select(compare, compare_count) %>%
-    inner_join(temp.data, ., by = "compare")
+    group_by(compare) %>%
+    mutate(down = sum(down), up = sum(up)) %>%
+    mutate(compare_count = paste(compare, "\nDown ", sep = "", down, " / Up ", up))
 	
 	# Plot
-  # TODO fails if no matches for down/up
 	temp.data %>%
 	  ggplot(., aes(x = FC, y = -log10(significance), color = type)) +
 	  geom_point() +
-	  scale_color_manual(values = c("SAME" = "grey70", "DOWN" = "blue", "UP" = "red")) +
+	  scale_color_manual(values = c("same" = "grey70", "down" = "blue", "up" = "red")) +
 	  xlim(-xlimit, xlimit) +
 	  ylim(0, ylimit) +
 	  xlab(expression("log"[2]*"(fold change)")) +
