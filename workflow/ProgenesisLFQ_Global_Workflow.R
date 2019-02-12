@@ -17,17 +17,14 @@ source_url("https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/Pr
 
 
 # Load raw data
-protm <- "https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/data/20180502_WOS52_Cr_UPS_protm.csv" %>%
+protm <- "https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/data/20180502_WOS52_Cr_UPS_protm.csv" %>% # ???
   load_data()
-
-#protm <- "###.csv" %>% # ???
-#  load_data()
 
 
 # Define columns with normalized abundance values
 samples <- 10:21 # ???
-  
-  
+
+
 # Workflow
 data <- protm %>%
   filter(Description != "cRAP") %>%
