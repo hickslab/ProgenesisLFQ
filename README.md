@@ -1,7 +1,7 @@
 
 # *`ProgenesisLFQ`*
 
-**This repository contains functions to process Progenesis QI for proteomics v2.0 data**
+**This repository contains functions to process Progenesis QI for proteomics v2.0 data.**
 
 Select and copy a workflow file below.
 
@@ -56,10 +56,6 @@ data2 <- data %>%
 # StatLFQ (t-test) ---------------------------------------------------------
 
 
-# Load packages
-library(broom)
-
-
 group.compare <- list(list(a, b),
                       list(a, c),
                       list(a, d))
@@ -76,6 +72,11 @@ data3 <- data2 %>%
 ```{r}
 # StatLFQ (ANOVA) -----------------------------------------------------------
 
+
+# Load packages
+library(broom)
+
+
 data4 <- data2 %>%
   calculate_1anova() %>%
   calculate_fc(., group.compare, difference = TRUE) %>%
@@ -87,13 +88,14 @@ data4 <- data2 %>%
 
 **Annotation**
 
+
 ```{r}
 # AnnotateLFQ -------------------------------------------------------------
 
 source_url(https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/AnnotateLFQ.R)
 
 
-phytozome <- "Z:/Lab_Members/Evan/Database/Cr_chlamydomonas/phytozome_v11/Creinhardtii/annotation/Creinhardtii_281_v5.5.annotation_info.txt"
+phytozome <- source_url("https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/data/Creinhardtii_281_v5.5.annotation_info.txt")
 
 
 data5 <- data4 %>%
