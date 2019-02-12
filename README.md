@@ -1,9 +1,11 @@
 
 # *`ProgenesisLFQ`*
 
-**This repository contains functions to process Progenesis QI for proteomics v2.0 data.**
+## **This repository contains functions to process Progenesis QI for proteomics v2.0 data**
 
-Select and copy a workflow file below. In RStudio, find '???' in the workflow and update with your particular filename/path before running.**
+Select and copy a workflow file below.
+
+In RStudio, find '???' in the workflow and update with your particular filename/path before running.**
 
 To run, you need the following data:
 
@@ -17,13 +19,16 @@ To run, you need the following data:
 
 # *`StatLFQ`*
 
-**Statistical workflow for differential analysis.**
+## **Statistical workflow for differential analysis.**
 
 Takes data in simple format (variable column followed by group columns).
 
 Append needed code to your workflow and run:
 
 ```{r}
+# StatLFQ (Imputation) ----------------------------------------------------
+
+
 # Load packages
 library(imp4p)
 
@@ -33,8 +38,8 @@ source_url("https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/St
 
 
 # Condition indeces in data
-a <- 2:5; b <- 6:9
-group <- list("0" = a, "60" = b)
+a <- 2:5; b <- 6:9; c <- 10:13; d <- 14:17
+group <- list("0" = a, "15" = b, "30" = c, "60" = d)
 
 
 # Process data
@@ -48,7 +53,16 @@ data2 <- data %>%
 * Pairwise *t*-test
 
 ```{r}
-group.compare <- list(list(a, b))
+# StatLFQ (t-test) ---------------------------------------------------------
+
+
+# Load packages
+library(broom)
+
+
+group.compare <- list(list(a, b),
+                      list(a, c),
+                      list(a, d))
 
 
 # Process data
@@ -71,14 +85,13 @@ data4 <- data2 %>%
 
 # *`AnnotateLFQ`*
 
+## **Annotation**
+
 source_url(https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/AnnotateLFQ.R)
 
-* [Clean Accession/Identifier]
-
-* [GO](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/AnnotateLFQ.R)
-
-* [KEGG](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/AnnotateLFQ.R)
 
 # *`PlotLFQ`*
+
+## **Plotting**
 
 source_url(https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/PlotLFQ.R)
