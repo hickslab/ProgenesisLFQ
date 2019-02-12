@@ -1,13 +1,13 @@
 
 # *`ProgenesisLFQ`*
 
-## **This repository contains functions to process Progenesis QI for proteomics v2.0 data**
+**This repository contains functions to process Progenesis QI for proteomics v2.0 data**
 
 Select and copy a workflow file below.
 
-In RStudio, find '???' in the workflow and update with your particular filename/path before running.**
+In RStudio, find '???' in the workflow and update with your particular filename/path before running.
 
-To run, you need the following data:
+To run, you need the following data on your computer:
 
 * Protein measurements:
   + [Global proteomics](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/ProgenesisLFQ_Global_Workflow.R)
@@ -19,7 +19,7 @@ To run, you need the following data:
 
 # *`StatLFQ`*
 
-## **Statistical workflow for differential analysis.**
+**Statistical workflow for differential analysis.**
 
 Takes data in simple format (variable column followed by group columns).
 
@@ -85,13 +85,46 @@ data4 <- data2 %>%
 
 # *`AnnotateLFQ`*
 
-## **Annotation**
+**Annotation**
+
+```{r}
+# AnnotateLFQ -------------------------------------------------------------
 
 source_url(https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/AnnotateLFQ.R)
 
 
+phytozome <- "Z:/Lab_Members/Evan/Database/Cr_chlamydomonas/phytozome_v11/Creinhardtii/annotation/Creinhardtii_281_v5.5.annotation_info.txt"
+
+
+data5 <- data4 %>%
+  add_missingness(., data, group) %>%
+  remove_PACid() %>%
+  split_identifier() %>%
+  add_phytozome(., phytozome)
+```
+
+
 # *`PlotLFQ`*
 
-## **Plotting**
+### **Plotting**
 
-source_url(https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/PlotLFQ.R)
+```{r}
+# PlotLFQ ----------------------------------------------------------------
+
+
+# Load functions 
+source_url("https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/PlotLFQ.R")
+
+
+# PCA
+plot_pca(data2, group)
+
+
+# Volcano plot
+plot_volcano(data3,
+             group,
+             fdr = TRUE,
+             threshold = 2,
+             xlimit = 10,
+             ylimit = 8)
+```
