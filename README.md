@@ -92,16 +92,17 @@ data4 <- data2 %>%
 ```{r}
 # AnnotateLFQ -------------------------------------------------------------
 
-source_url(https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/AnnotateLFQ.R)
+
+# Load functions
+source_url("https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/AnnotateLFQ.R")
 
 
-phytozome <- source_url("https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/data/Creinhardtii_281_v5.5.annotation_info.txt")
+phytozome <- "https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/data/Creinhardtii_281_v5.5.annotation_info.txt"
 
 
 data5 <- data3 %>%
   add_missingness(., data, group) %>%
   remove_PACid() %>%
-  split_identifier() %>%
   add_phytozome(., phytozome)
 ```
 
