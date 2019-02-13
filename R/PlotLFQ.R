@@ -13,6 +13,29 @@ plot_corr <- function(data, group = group) {
 }
 
 
+plot_dendrogram <- function(df, group){
+  # Load packages
+  library(dendextend)
+  
+  temp.data <- df %>%
+    select(group %>% flatten_int()) %>%
+    scale() %>%
+    t() %>%
+    dist() %>%
+    hclust() %>%
+    #cutree(., 3) %>%
+    as.dendrogram()
+  
+  temp.data %>%
+    set("branches_k_color", k = 3) %>%
+    plot(xlab = "Distance", ylab = "Replicate")
+  
+  temp.data %>%
+    rect.dendrogram(k = 3)
+  
+}
+
+
 plot_pca <- function(df, group){
   temp.data <- df %>%
     select(group %>% flatten_int())
@@ -26,13 +49,13 @@ plot_pca <- function(df, group){
     ggplot(., aes(x = PC1, y = PC2, color = condition, label = replicate)) +
     geom_point(size = 8) +
     scale_color_discrete(limits = names(group)) +
-    theme(text = element_text(size = 16)) +
+    theme_bw(base_size = 20) +
     geom_text(color = "black")
   
 }
 
 
-plot_volcano <- function(data3, group, fdr = TRUE, threshold = 2, xlimit = 10, ylimit = 6){
+plot_volcano <- function(data3, group, fdr = TRUE, threshold = 2, xlimit = 8, ylimit = 8){
   # Data preparation
   temp.data <- 	data3 %>%
 	  select(-unlist(group)) %>%
@@ -134,7 +157,7 @@ plot_hclust <- function(df, group, k = 5){
     
     labs(x = "Condition", y = "Z-score") +
     
-    theme_bw(base_size = 16)
+    theme_bw(base_size = 20)
   
 }
  
