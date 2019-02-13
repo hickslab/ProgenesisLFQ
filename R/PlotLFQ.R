@@ -55,7 +55,7 @@ plot_pca <- function(df, group){
 }
 
 
-plot_volcano <- function(data3, group, fdr = TRUE, threshold = 2, xlimit = 8, ylimit = 8){
+plot_volcano <- function(data3, group, fdr = TRUE, threshold = 2, xlimit = 10, ylimit = 10){
   # Data preparation
   temp.data <- 	data3 %>%
 	  select(-unlist(group)) %>%
@@ -88,20 +88,29 @@ plot_volcano <- function(data3, group, fdr = TRUE, threshold = 2, xlimit = 8, yl
   temp.data <- temp.data %>%
     group_by(compare) %>%
     mutate(down = sum(down), up = sum(up)) %>%
-    mutate(compare_count = paste(compare, "\nDown ", sep = "", down, " / Up ", up))
+    mutate(compare_count = paste(compare, "\nDown ", sep = "", down, " / Up ", up)) %>%
+    ungroup()
 	
+  temp.data <- temp.data %>%
+    mutate(compare = factor(compare, names(group.compare)))
+  
+  temp.label <- temp.data %>%
+    group_by(compare, compare_count) %>%
+    count() %>%
+    data.frame()
+  
 	# Plot
 	temp.data %>%
 	  ggplot(., aes(x = FC, y = -log10(significance), color = type)) +
 	  geom_point() +
 	  scale_color_manual(values = c("same" = "grey70", "down" = "blue", "up" = "red")) +
-	  xlim(-xlimit, xlimit) +
-	  ylim(0, ylimit) +
+	  coord_cartesian(xlim = c(-xlimit, xlimit), ylim = c(0, ylimit)) +
 	  xlab(expression("log"[2]*"(fold change)")) +
 	  ylab(if_else(fdr == TRUE,
 	               expression("-log"[10]*"(FDR-adjusted "*italic(p)*"-value)"),
 	               expression( "-log"[10]*"("*italic(p)*"-value)"))) +
-	  facet_wrap(~ compare_count) +
+	  facet_wrap(~ compare) +
+	  geom_text(data = temp.label, aes(x = 0, y = Inf, label = compare_count), inherit.aes = FALSE) +
 	  theme_bw(base_size = 16) +
 	  guides(color = FALSE)
 
