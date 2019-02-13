@@ -1,13 +1,11 @@
 
 # *`ProgenesisLFQ`*
 
-**This repository contains functions to process Progenesis QI for proteomics v2.0 data.**
+Select and copy the contents of a workflow file below.
 
-Select and copy a workflow file below.
+In RStudio, find '???' in the workflow and update with your particular details before running.
 
-In RStudio, find '???' in the workflow and update with your particular filename/path before running.
-
-To run, you need the following data on your computer:
+To run, you need the following data available:
 
 * Protein measurements:
   + [Global proteomics](https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/workflow/ProgenesisLFQ_Global_Workflow.R)
@@ -25,6 +23,8 @@ Takes data in simple format (variable column followed by group columns).
 
 Append needed code to your workflow and run:
 
+* Imputation
+
 ```{r}
 # StatLFQ (Imputation) ----------------------------------------------------
 
@@ -38,8 +38,8 @@ source_url("https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/St
 
 
 # Condition indeces in data
-a <- 2:5; b <- 6:9; c <- 10:13
-group <- list("25" = a, "50" = b, "100" = c)
+a <- 2:5; b <- 6:9; c <- 10:13 # ???
+group <- list("25" = a, "50" = b, "100" = c) # ???
 
 
 # Process data
@@ -56,7 +56,7 @@ data2 <- data %>%
 # StatLFQ (t-test) ---------------------------------------------------------
 
 
-group.compare <- list(list(a, b),
+group.compare <- list(list(a, b), # ???
                       list(a, c),
                       list(b, c))
 
