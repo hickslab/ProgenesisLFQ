@@ -56,9 +56,13 @@ data2 <- data %>%
 # StatLFQ (t-test) ---------------------------------------------------------
 
 
-group.compare <- list(list(a, b), # ???
-                      list(a, c),
-                      list(b, c))
+# Load packages
+library(broom)
+
+
+group.compare <- list("A-B" = list(a, b), # ???
+                      "A-C" = list(a, c),
+                      "B-C" = list(b, c))
 
 
 # Process data
@@ -75,6 +79,11 @@ data3 <- data2 %>%
 
 # Load packages
 library(broom)
+
+
+group.compare <- list("A-B" = list(a, b), # ???
+                      "A-C" = list(a, c),
+                      "B-C" = list(b, c))
 
 
 data4 <- data2 %>%
@@ -126,6 +135,7 @@ plot_pca(data2, group)
 # Volcano plot
 plot_volcano(data3,
              group,
+             group.compare,
              fdr = TRUE,
              threshold = 2,
              xlimit = 10,

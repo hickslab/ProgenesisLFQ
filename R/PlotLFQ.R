@@ -55,7 +55,7 @@ plot_pca <- function(df, group){
 }
 
 
-plot_volcano <- function(data3, group, fdr = TRUE, threshold = 2, xlimit = 10, ylimit = 10){
+plot_volcano <- function(data3, group, group.compare, fdr = TRUE, threshold = 2, xlimit = 10, ylimit = 8){
   # Data preparation
   temp.data <- 	data3 %>%
 	  select(-unlist(group)) %>%
@@ -88,12 +88,14 @@ plot_volcano <- function(data3, group, fdr = TRUE, threshold = 2, xlimit = 10, y
   temp.data <- temp.data %>%
     group_by(compare) %>%
     mutate(down = sum(down), up = sum(up)) %>%
-    mutate(compare_count = paste(compare, "\nDown ", sep = "", down, " / Up ", up)) %>%
-    ungroup()
+    mutate(compare_count = paste(compare, "\nDown ", sep = "", down, " / Up ", up))
 	
+  # Set facet order
   temp.data <- temp.data %>%
+    ungroup() %>%
     mutate(compare = factor(compare, names(group.compare)))
   
+  # 
   temp.label <- temp.data %>%
     group_by(compare, compare_count) %>%
     count() %>%
@@ -155,11 +157,14 @@ plot_hclust <- function(df, group, k = 5){
     
     gather(condition, scaled, -rowname, -clustered, -clustered_count)
   
+  # Set condition order
+  temp.data <- temp.data %>%
+    mutate(condition = factor(condition, level = names(group)))
   
   # Plot
   temp.data %>%
-    ggplot(., aes(x = condition, y = scaled, fill = factor(clustered))) + geom_boxplot(outlier.shape = NA) + guides(fill = FALSE) + scale_x_discrete(limits = names(group)) + 
-    #ggplot(., aes(x = condition, y = scaled, group = rowname, color = factor(clustered))) + geom_line() + guides(color = FALSE) + #scale_color_brewer(palette = "Pastel1") +
+    #ggplot(., aes(x = condition, y = scaled, fill = factor(clustered))) + geom_boxplot(outlier.shape = NA) + guides(fill = FALSE) + scale_x_discrete(limits = names(group)) + 
+    ggplot(., aes(x = condition, y = scaled, group = rowname, color = factor(clustered))) + geom_line() + guides(color = FALSE) + #scale_color_brewer(palette = "Pastel1") +
     #ggplot(., aes(x = condition, y = scaled)) + geom_line(group = 2) +# geom_smooth(method = "loess") +
     
     facet_wrap(~ clustered_count) +

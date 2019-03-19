@@ -243,7 +243,9 @@ pull_uniprot <- function(output = "Cr_uniprot_20190130_annotation.tsv"){
 
 
 separate_sites <- function(df){
-  #data2
+  # data5
+  temp.data <- df %>%
+    select(Accession, Sites, everything())
   
   
 }

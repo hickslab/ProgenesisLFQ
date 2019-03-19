@@ -112,11 +112,7 @@ impute_imp4p <- function(data, group = group){
 }
 
 
-impute_conditional <- function(df, group){
-  # In-house conditional imputation
-  # ~ data
-  
-}
+
 
 
 calculate_ttest <- function(data2, group.compare, fdr = TRUE){
@@ -194,7 +190,59 @@ calculate_ttest <- function(data2, group.compare, fdr = TRUE){
 }
 
 
+calculate_ttest2 <- function(df, group.compare){
+  # Check data type
+  variable <- df %>%
+    select(1) %>%
+    names()
+  
+  # Initiate output dataframe
+  temp.ttest <- df
+  
+  # Loop over pairwise comparisons
+  for (i in 1:length(group.compare)){
+    # Format
+    temp.data <- df %>%
+      select(1, group.compare[[i]] %>% flatten_int()) %>%
+      gather(condition, abundance, -1) %>%
+      separate(condition, into = c("condition", "replicate"), sep = "-") %>%
+      group_by_(variable)
+    
+    # Nest and test
+    temp.data <- temp.data %>%
+      nest() %>%
+      mutate(ttest = map(data, ~ t.test(abundance ~ condition, data = .x, 
+                                        alternative = "two.sided",
+                                        var.equal = TRUE)),
+             summary = map(ttest, tidy))
+    
+    # Unnest and FDR adjust
+    temp.data <- temp.data %>%
+      unnest(summary) %>%
+      mutate(fdr = p.adjust(p.value, method = "BH", n = length(p.value)))
+    
+    # Select model output
+    temp.data <- temp.data %>%
+      select(1, p.value, fdr)
+    
+    # Rename columns
+    temp.name <- group.compare[i] %>% names()
+    temp.data <- temp.data %>% rename_at("p.value", ~ paste(temp.name, "_P", sep = ""))
+    temp.data <- temp.data %>% rename_at("fdr", ~ paste(temp.name, "_FDR", sep = ""))
+    
+    # Join to data
+    temp.ttest <- temp.data %>%
+      left_join(temp.ttest, ., by = variable)
+    
+  }
+  # Exit
+  return(temp.ttest)
+  
+}
+
+
 calculate_1anova <- function(data2){
+  # Check data type
   variable <- data2 %>%
     select(1) %>%
     names()
@@ -208,10 +256,10 @@ calculate_1anova <- function(data2){
   # Nest and test
   temp.data <- temp.data %>%
     nest() %>%
-    mutate(aov = map(data, ~ aov(condition ~ abundance, data = .x)),
+    mutate(aov = map(data, ~ aov(abundance ~ condition, data = .x)),
            summary = map(aov, tidy))
   
-  # Unnest and adjust FDR
+  # Unnest and FDR adjust
   temp.data <- temp.data %>%
     unnest(summary) %>%
     filter(term == "abundance") %>%
