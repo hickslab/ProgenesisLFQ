@@ -61,6 +61,23 @@ reduce_features <- function(data){
 }
 
 
+reduce_features_tidy <- function(data){
+  data %>%
+    # Summarize features with identical peptides - different accessions
+    group_by(`#`, Sequence, Modifications, Score) %>%
+    top_n(1, `Unique peptides`) %>%
+    top_n(1, `Confidence score`) %>%
+    slice_(1) %>%
+    
+    # Summarize features with multiple peptides
+    group_by(`#`) %>%
+    top_n(1, Score) %>%
+    slice_(1) %>%
+    ungroup()
+  
+}
+
+
 reduce_identifiers <- function(data, group){
   # Reduce to unique identifiers represented by highest score
   temp.data <- data %>%
@@ -84,7 +101,7 @@ reduce_identifiers <- function(data, group){
 }
 
 
-get_identifier <- function(data){
+get_identifier_peptide <- function(data){
   data %>%
     mutate(Identifier = paste(Accession, Sequence, sep = "--"))
   
@@ -176,6 +193,40 @@ get_identifier_phospho <- function(data, database){
   temp.data <- temp.data %>%
     rowwise() %>%
     mutate(Residue = str_sub(Sequence, Identifier, Identifier) %>% list())
+  
+  # Map position of peptide to protein
+  temp.data <- temp.data %>%
+    mutate(Start = str_locate_all(database[Accession], as.character(Sequence))[[1]][[1]] %>%
+             list())
+  
+  # Build identifier
+  temp.data <- temp.data %>%
+    mutate(Identifier = (Identifier + Start - 1) %>%
+             paste(Residue, ., sep = "") %>%
+             paste(., collapse = "-") %>%
+             paste(Accession, ., sep = "--"))
+  
+  # Return clean dataframe
+  temp.data <- temp.data %>%
+    select(-Residue, -Start) %>%
+    ungroup()
+  
+}
+
+
+get_identifier <- function(data, database, modification = "Phospho"){
+  # Map integer position of modification
+  temp.data <- data %>%
+    mutate(Identifier = str_split(as.character(Modifications), "\\|") %>%
+             lapply(., str_subset, modification) %>%
+             lapply(., str_extract, "(?<=\\[)(.*)(?=\\])") %>%
+             lapply(., as.numeric))
+  
+  # Map modified residue by position
+  temp.data <- temp.data %>%
+    rowwise() %>%
+    mutate(Residue = str_sub(Sequence, start = Identifier, end = Identifier) %>%
+             list())
   
   # Map position of peptide to protein
   temp.data <- temp.data %>%
