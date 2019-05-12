@@ -18,7 +18,7 @@ setwd("###")
 
 
 # Load functions 
-source_url("https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/ProgenesisLFQ_Phospho.R")
+source_url("https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/ProgenesisLFQ_Peptide.R")
 
 
 # Load Progenesis peptide measurements
