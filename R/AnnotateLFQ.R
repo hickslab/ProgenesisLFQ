@@ -221,7 +221,7 @@ add_phytozome <- function(df, path){
 add_uniprot <- function(df, path){
   # Load UniProt annotation file
   temp.data <- read_delim(path, delim = "\t", col_types = cols()) %>%
-    rename(Entry = "Accession")
+    rename(Accession = Entry)
   
   # Join onto input data
   temp.data <- temp.data %>%

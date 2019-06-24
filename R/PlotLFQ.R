@@ -46,10 +46,11 @@ plot_pca <- function(df, group){
     data.frame() %>%
     rownames_to_column() %>%
     separate(rowname, into = c("condition", "replicate"), sep = "-") %>%
-    ggplot(., aes(x = PC1, y = PC2, color = condition, label = replicate)) +
-    geom_point(size = 8) +
+    ggplot(., aes(x = PC1, y = PC2, fill = condition, label = replicate)) +
+    geom_point(shape = 21, size = 8) +
     scale_color_discrete(limits = names(group)) +
-    theme_bw(base_size = 20) +
+    #theme_bw(base_size = 20) +
+    theme(text = element_text(size = 20)) +
     geom_text(color = "black")
   
 }
@@ -93,7 +94,8 @@ plot_volcano <- function(data3, group, group.compare, fdr = TRUE, threshold = 2,
   # Set facet order
   temp.data <- temp.data %>%
     ungroup() %>%
-    mutate(compare = factor(compare, names(group.compare)))
+    mutate(compare = factor(compare, levels = names(group.compare)),
+           type = factor(type, levels = c("same", "down", "up")))
   
   # 
   temp.label <- temp.data %>%
@@ -104,7 +106,7 @@ plot_volcano <- function(data3, group, group.compare, fdr = TRUE, threshold = 2,
 	# Plot
 	temp.data %>%
 	  ggplot(., aes(x = FC, y = -log10(significance), color = type)) +
-	  geom_point() +
+	  geom_point(alpha = 1, size = 3) +
 	  scale_color_manual(values = c("same" = "grey70", "down" = "blue", "up" = "red")) +
 	  coord_cartesian(xlim = c(-xlimit, xlimit), ylim = c(0, ylimit)) +
 	  xlab(expression("log"[2]*"(fold change)")) +
@@ -113,7 +115,8 @@ plot_volcano <- function(data3, group, group.compare, fdr = TRUE, threshold = 2,
 	               expression( "-log"[10]*"("*italic(p)*"-value)"))) +
 	  facet_wrap(~ compare) +
 	  geom_text(data = temp.label, aes(x = 0, y = Inf, label = compare_count), inherit.aes = FALSE) +
-	  theme_bw(base_size = 16) +
+	  #theme_bw(base_size = 16) +
+	  theme(text = element_text(size = 20)) +
 	  guides(color = FALSE)
 
 }
@@ -310,11 +313,3 @@ plot_joy <- function(data, group = group){
     ylab("")
   
 }
-
-
-plot_ROC <- function(df, group, tp, fp){
-  
-  
-}
-
-

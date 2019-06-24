@@ -112,7 +112,17 @@ impute_imp4p <- function(data, group = group){
 }
 
 
-
+impute_norm <- function(df, group){
+  # Check data type
+  variable <- df %>%
+    select(1) %>%
+    names()
+  
+  
+  df %>%
+    gather(condition, abundance, -variable)
+  
+}
 
 
 calculate_ttest <- function(data2, group.compare, fdr = TRUE){
