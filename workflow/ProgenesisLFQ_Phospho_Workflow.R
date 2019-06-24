@@ -1,3 +1,5 @@
+# ProgenesisLFQ --------------------------------------------------------------
+
 # Load packages
 library(devtools)
 library(tidyverse)
@@ -6,15 +8,12 @@ library(Biostrings)
 
 # Or install packages
 #install.packages("devtools")
-
 #install.packages("tidyverse")
-
-#install.packages("BiocManager")
-#BiocManager::install("Biostrings")
+#install.packages("BiocManager"); BiocManager::install("Biostrings")
 
 
-# Set working directory where raw data is located
-setwd("###")
+# Set working directory
+setwd("./") # ???
 
 
 # Load functions 
@@ -22,22 +21,22 @@ source_url("https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/R/Pr
 
 
 # Load Progenesis peptide measurements
-pepm <- "###.csv" %>%
+pepm <- "####.csv" %>% # ???
   load_data()
 
 
 # Load Progenesis protein measurements
-protm <- "###.csv" %>%
+protm <- "###.csv" %>% # ???
   load_data()
 
 
-# Load Protein sequence database
-database <- "###.fasta" %>%
+# Load FASTA protein database
+database <- "https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/data/Cr_v5.5_mt_chl_crap_20160502.fasta" %>%
   load_database()
 
 
 # Define normalized abundance columns in pepm
-samples <- #:#
+samples <- 19:34 # ???
 
 
 # Process data
@@ -49,8 +48,8 @@ data <- pepm %>%
   filter_phospho() %>%
   get_identifier_phospho(database = database) %>%
   reduce_identifiers(group = samples) %>%
-  simplify_cols(variable = "Identifier", group = samples) %>%
-  remove_PACid(., variable = "Identifier")
+  select(Identifier, samples) %>%
+  data.frame()
 
 
 # Write parsed data to file
