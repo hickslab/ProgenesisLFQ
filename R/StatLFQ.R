@@ -261,7 +261,7 @@ calculate_1anova <- function(data2){
   temp.data <- data2 %>%
     gather(condition, abundance, -1) %>%
     separate(condition, into = c("condition", "replicate"), sep = "-") %>%
-    group_by_(variable)
+    group_by(!!as.name(variable))
   
   # Nest and test
   temp.data <- temp.data %>%
@@ -272,7 +272,8 @@ calculate_1anova <- function(data2){
   # Unnest and FDR adjust
   temp.data <- temp.data %>%
     unnest(summary) %>%
-    filter(term == "abundance") %>%
+    #filter(term == "abundance") %>%
+    filter(term == "condition") %>%
     mutate(fdr = p.adjust(p.value, method = "BH", n = length(p.value)))
   
   # Join to data
