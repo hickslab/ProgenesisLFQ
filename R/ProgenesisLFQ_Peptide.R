@@ -78,29 +78,6 @@ reduce_features_tidy <- function(data){
 }
 
 
-reduce_identifiers <- function(data, group){
-  # Reduce to unique identifiers represented by highest score
-  temp.data <- data %>%
-    group_by(Identifier) %>%
-    top_n(1, Score) %>%
-    slice_(1) %>%
-    arrange(Identifier)
-  
-  # Column-wise sum by group
-  temp.issue <- data %>%
-    group_by(Identifier) %>%
-    select(Identifier, unlist(group)) %>%
-    summarize_all(., funs(sum))
-  
-  # Replace summed abundance in ordered dataset
-  temp.data[, unlist(group)] <- temp.issue[, -1]
-  
-  temp.data %>%
-    ungroup()
-  
-}
-
-
 get_identifier_peptide <- function(data){
   data %>%
     mutate(Identifier = paste(Accession, Sequence, sep = "--"))
@@ -127,6 +104,20 @@ filter_redox <- function(pepm, reduced = "IAM", oxidized = "Empty"){
       filter(., str_count(Sequence, "C") > str_count(Modifications, mod))
     
   }
+}
+
+
+filter_redox_tidy <- function(pepm, reduced = "Nethylmaleimide"){
+  # Default Mascot variable modifications:
+  # IAM = Carbamidomethyl
+  # NEM = Nethylmaleimide
+  
+  temp.data <- df %>%
+    mutate(Modifications = replace_na(Modifications, "")) %>%
+    #mutate(Cys = str_count(Sequence, "C")) %>%
+    #mutate(Mod = str_count(Modifications, reduced)) %>%
+    filter(., str_count(Sequence, "C") > str_count(Modifications, reduced))
+  
 }
 
 
@@ -246,3 +237,27 @@ get_identifier <- function(data, database, modification = "Phospho"){
     ungroup()
   
 }
+
+
+reduce_identifiers <- function(data, group){
+  # Reduce to unique identifiers represented by highest score
+  temp.data <- data %>%
+    group_by(Identifier) %>%
+    top_n(1, Score) %>%
+    slice_(1) %>%
+    arrange(Identifier)
+  
+  # Column-wise sum by group
+  temp.issue <- data %>%
+    group_by(Identifier) %>%
+    select(Identifier, unlist(group)) %>%
+    summarize_all(., funs(sum))
+  
+  # Replace summed abundance in ordered dataset
+  temp.data[, unlist(group)] <- temp.issue[, -1]
+  
+  temp.data %>%
+    ungroup()
+  
+}
+
