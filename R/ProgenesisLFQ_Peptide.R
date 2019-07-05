@@ -112,7 +112,7 @@ filter_redox_tidy <- function(pepm, reduced = "Nethylmaleimide"){
   # IAM = Carbamidomethyl
   # NEM = Nethylmaleimide
   
-  temp.data <- df %>%
+  temp.data <- pepm %>%
     mutate(Modifications = replace_na(Modifications, "")) %>%
     #mutate(Cys = str_count(Sequence, "C")) %>%
     #mutate(Mod = str_count(Modifications, reduced)) %>%
