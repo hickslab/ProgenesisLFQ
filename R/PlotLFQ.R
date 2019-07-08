@@ -165,8 +165,8 @@ plot_hclust <- function(df, group, k = 3){
   
   
   temp.data <- temp.data %>%
-    #mutate(group = group_indices(., condition))
-    mutate(breaks = condition %>% as.numeric())
+    mutate(breaks = group_indices(., condition))
+    #mutate(breaks = condition %>% as.numeric())
     
   # Plot
   temp.data %>%
@@ -174,7 +174,7 @@ plot_hclust <- function(df, group, k = 3){
     geom_jitter(aes(color = condition), height = 0) +
     geom_boxplot(color = "black", fill = NA, outlier.shape = NA, size = 1.5) +
     geom_smooth(aes(x = jitter(breaks)), method = "loess", size = 2) +
-    scale_x_discrete(breaks = 1:4, labels = names(group)) +
+    scale_x_discrete(breaks = 1:length(group), labels = names(group)) +
     guides(color = FALSE, fill = FALSE) +
     facet_wrap(~ cluster_count) +
     labs(x = "Condition", y = "Z-score")

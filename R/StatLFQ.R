@@ -345,7 +345,7 @@ add_max_fc <- function(data4){
 
 
 
-calculate_hclust<- function(df, group, k = 3){
+calculate_hclust <- function(df, group, k = 3){
   # Define experiment
   variable <- df %>%
     select(1) %>%
