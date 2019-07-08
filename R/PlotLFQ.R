@@ -13,7 +13,7 @@ plot_corr <- function(data, group = group) {
 }
 
 
-plot_dendrogram <- function(df, group){
+plot_dendrogram <- function(df, group, k = 3){
   # Load packages
   library(dendextend)
   
@@ -31,7 +31,7 @@ plot_dendrogram <- function(df, group){
     plot(xlab = "Distance", ylab = "Replicate")
   
   temp.data %>%
-    rect.dendrogram(k = 3)
+    rect.dendrogram(k)
   
 }
 
@@ -90,7 +90,7 @@ plot_volcano <- function(data3, group, group.compare, fdr = TRUE, threshold = 2,
     group_by(compare) %>%
     mutate(down = sum(down), up = sum(up)) %>%
     mutate(compare_count = paste(compare, "\nDown ", sep = "", down, " / Up ", up))
-	
+  
   # Set facet order
   temp.data <- temp.data %>%
     ungroup() %>%
@@ -106,7 +106,7 @@ plot_volcano <- function(data3, group, group.compare, fdr = TRUE, threshold = 2,
 	# Plot
 	temp.data %>%
 	  ggplot(., aes(x = FC, y = -log10(significance), color = type)) +
-	  geom_point(alpha = 0.5, size = 5) +
+	  geom_point(size = 3) +
 	  scale_color_manual(values = c("same" = "grey70", "down" = "blue", "up" = "red")) +
 	  coord_cartesian(xlim = c(-xlimit, xlimit), ylim = c(0, ylimit)) +
 	  xlab(expression("log"[2]*"(fold change)")) +
@@ -114,15 +114,14 @@ plot_volcano <- function(data3, group, group.compare, fdr = TRUE, threshold = 2,
 	               #expression("-log"[10]*"(FDR-adjusted "*italic(p)*"-value)"),
 	               expression( "-log"[10]*"(FDR)"),
 	               expression( "-log"[10]*"("*italic(p)*"-value)"))) +
-	  facet_wrap(~ compare) +
-	  geom_text(data = temp.label, aes(x = 0, y = Inf, label = compare_count), inherit.aes = FALSE) +
-	  #theme_bw(base_size = 16) +
+	  facet_wrap(~ compare_count) +
+	  #geom_text(data = temp.label, aes(x = 0, y = Inf, label = compare_count), inherit.aes = FALSE) +
 	  guides(color = FALSE)
 
 }
 
 
-plot_hclust <- function(df, group, k = 5){
+plot_hclust <- function(df, group, k = 3){
   # Select abundance columns
   temp.data <- df %>%
     select(1, group %>% flatten_int())
@@ -135,7 +134,7 @@ plot_hclust <- function(df, group, k = 5){
     ungroup() %>%
     spread(., condition, mean)
   
-    
+  
   # Z-score rowwise normalization
   temp.data[-1] <- temp.data %>%
     select(-1) %>%
@@ -146,39 +145,43 @@ plot_hclust <- function(df, group, k = 5){
     #select(unlist(group)) %>%
     select(-1) %>%
     
-    mutate(clustered = dist(.) %>%
+    mutate(cluster = dist(.) %>%
              hclust() %>%
              cutree(k)) %>%
     
-    mutate(clustered = LETTERS[clustered]) %>%
+    mutate(cluster = LETTERS[cluster]) %>%
     
-    group_by(clustered) %>%
-    mutate(clustered_count = paste(clustered, "\n", sep = "", n())) %>%
+    group_by(cluster) %>%
+    mutate(cluster_count = paste(cluster, "\n", sep = "", n())) %>%
     ungroup() %>%
     
     rownames_to_column() %>%
     
-    gather(condition, scaled, -rowname, -clustered, -clustered_count)
+    gather(condition, scaled, -rowname, -cluster, -cluster_count)
   
   # Set condition order
   temp.data <- temp.data %>%
     mutate(condition = factor(condition, level = names(group)))
   
+  
+  temp.data <- temp.data %>%
+    #mutate(group = group_indices(., condition))
+    mutate(breaks = condition %>% as.numeric())
+    
   # Plot
   temp.data %>%
-    #ggplot(., aes(x = condition, y = scaled, fill = factor(clustered))) + geom_boxplot(outlier.shape = NA) + guides(fill = FALSE) + scale_x_discrete(limits = names(group)) + 
-    ggplot(., aes(x = condition, y = scaled, group = rowname, color = factor(clustered))) + geom_line() + guides(color = FALSE) + #scale_color_brewer(palette = "Pastel1") +
-    #ggplot(., aes(x = condition, y = scaled)) + geom_line(group = 2) +# geom_smooth(method = "loess") +
-    
-    facet_wrap(~ clustered_count) +
-    
-    labs(x = "Condition", y = "Z-score") +
-    
-    theme_bw(base_size = 20)
+    ggplot(., aes(x = factor(breaks), y = scaled)) +
+    geom_jitter(aes(color = condition), height = 0) +
+    geom_boxplot(color = "black", fill = NA, outlier.shape = NA, size = 1.5) +
+    geom_smooth(aes(x = jitter(breaks)), method = "loess", size = 2) +
+    scale_x_discrete(breaks = 1:4, labels = names(group)) +
+    guides(color = FALSE, fill = FALSE) +
+    facet_wrap(~ cluster_count) +
+    labs(x = "Condition", y = "Z-score")
   
 }
- 
 
+ 
 plot_heatmap <- function(df){
 
   temp.data %>%
@@ -311,5 +314,25 @@ plot_joy <- function(data, group = group){
     xlab(expression("log"[2]*"(Abundance)")) +
     #facet_wrap(~group, scales = "free_y") +
     ylab("")
+  
+}
+
+
+plot_fc_density <- function(df, group){
+  #df: calculate_fc()
+  
+  # Data preparation
+  temp.data <- 	df %>%
+    select(1, contains("_FC")) %>%
+    gather(compare, value, -1) %>%
+    separate(compare,
+             sep = "_",
+             into = c("compare", "variable"),
+             extra = "merge",
+             fill = "right")
+  
+  ggplot(., aes(x = value, fill = compare)) +
+    geom_density(alpha = 0.5)
+  
   
 }

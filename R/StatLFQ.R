@@ -272,7 +272,6 @@ calculate_1anova <- function(data2){
   # Unnest and FDR adjust
   temp.data <- temp.data %>%
     unnest(summary) %>%
-    #filter(term == "abundance") %>%
     filter(term == "condition") %>%
     mutate(fdr = p.adjust(p.value, method = "BH", n = length(p.value)))
   
@@ -341,5 +340,51 @@ add_max_fc <- function(data4){
                                    true = max(value),
                                    false = min(value))) %>%
     left_join(data4, ., by = variable)
+  
+}
+
+
+
+calculate_hclust<- function(df, group, k = 3){
+  # Define experiment
+  variable <- df %>%
+    select(1) %>%
+    names()
+  
+  # Select abundance columns
+  temp.data <- df %>%
+    select(1, group %>% flatten_int())
+  
+  # Calculate mean condition abundance
+  temp.data <- temp.data %>%
+    gather(replicate, abundance, -1) %>%
+    separate(replicate, into = c("condition", "replicate"), sep = "-") %>%
+    group_by(!!as.name(variable), condition) %>%
+    #group_by(.[[1]], condition) %>%
+    summarize(mean = mean(abundance)) %>%
+    ungroup() %>%
+    spread(., condition, mean)
+  
+  # Z-score rowwise normalization
+  temp.data[-1] <- temp.data %>%
+    select(-1) %>%
+    apply(., 1, scale) %>%
+    t()
+  
+  temp.data <- temp.data %>%
+    select(-1) %>%
+    
+    mutate(cluster = dist(.) %>%
+             hclust() %>%
+             cutree(k)) %>%
+    
+    mutate(cluster = LETTERS[cluster]) %>%
+    
+    bind_cols(temp.data[1], .)# %>% dplyr::rename(., Accession = `.[[1]]`)
+  
+  # Join to input data
+  temp.data %>%
+    select(1, cluster) %>%
+    left_join(df, ., by = variable)
   
 }

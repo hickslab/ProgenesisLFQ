@@ -221,11 +221,17 @@ add_phytozome <- function(df, path){
 add_uniprot <- function(df, path){
   # Load UniProt annotation file
   temp.data <- read_delim(path, delim = "\t", col_types = cols()) %>%
-    rename(Accession = Entry)
+    dplyr::rename(Accession = Entry)
   
   # Join onto input data
   temp.data <- temp.data %>%
     left_join(df, ., by = "Accession")
+  
+}
+
+
+add_uniprot2 <- function(df, organism){
+  
   
 }
 
