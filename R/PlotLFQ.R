@@ -116,24 +116,31 @@ plot_volcano <- function(data3, group, group.compare, fdr = TRUE, threshold = 2,
 	               expression( "-log"[10]*"("*italic(p)*"-value)"))) +
 	  facet_wrap(~ compare_count) +
 	  #geom_text(data = temp.label, aes(x = 0, y = Inf, label = compare_count), inherit.aes = FALSE) +
-	  guides(color = FALSE)
+	  guides(color = FALSE) +
+	  geom_hline(yintercept = -log10(0.05), linetype = 2, size = 1) +
+	  geom_vline(xintercept = c(-log2(threshold), log2(threshold)), linetype = 2, size = 1)
 
 }
 
 
-plot_hclust <- function(df, group, k = 3){
+plot_hclust <- function(df, group, k = 3, type = "jitter"){
+  # Define experiment
+  variable <- df %>%
+    select(1) %>%
+    names()
+  
   # Select abundance columns
   temp.data <- df %>%
     select(1, group %>% flatten_int())
   
+  # Calculate mean condition abundance
   temp.data <- temp.data %>%
     gather(replicate, abundance, -1) %>%
     separate(replicate, into = c("condition", "replicate"), sep = "-") %>%
-    group_by(.[[1]], condition) %>%
+    group_by(!!as.name(variable), condition) %>%
     summarize(mean = mean(abundance)) %>%
     ungroup() %>%
     spread(., condition, mean)
-  
   
   # Z-score rowwise normalization
   temp.data[-1] <- temp.data %>%
@@ -142,7 +149,6 @@ plot_hclust <- function(df, group, k = 3){
     t()
   
   temp.data <- temp.data %>%
-    #select(unlist(group)) %>%
     select(-1) %>%
     
     mutate(cluster = dist(.) %>%
@@ -169,7 +175,7 @@ plot_hclust <- function(df, group, k = 3){
     #mutate(breaks = condition %>% as.numeric())
     
   # Plot
-  temp.data %>%
+  p <- temp.data %>%
     ggplot(., aes(x = factor(breaks), y = scaled)) +
     geom_jitter(aes(color = condition), height = 0) +
     geom_boxplot(color = "black", fill = NA, outlier.shape = NA, size = 1.5) +
@@ -178,6 +184,21 @@ plot_hclust <- function(df, group, k = 3){
     guides(color = FALSE, fill = FALSE) +
     facet_wrap(~ cluster_count) +
     labs(x = "Condition", y = "Z-score")
+  
+  # Line type
+  if (type == "line"){
+    p <- temp.data %>%
+      ggplot(., aes(x = factor(breaks), y = scaled)) +
+      geom_line(aes(group = rowname, color = cluster_count), alpha = 0.5, size = 1) +
+      geom_smooth(aes(x = jitter(breaks)), method = "loess", size = 1.5) +
+      geom_boxplot(color = "black", fill = NA, outlier.shape = NA, size = 1.5) +
+      scale_x_discrete(breaks = 1:length(group), labels = names(group)) +
+      guides(color = FALSE, fill = FALSE) +
+      facet_wrap(~ cluster_count) +
+      labs(x = "Condition", y = "Z-score")
+    
+  }
+  return(p)
   
 }
 

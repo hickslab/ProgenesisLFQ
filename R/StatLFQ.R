@@ -273,11 +273,12 @@ calculate_1anova <- function(data2){
   temp.data <- temp.data %>%
     unnest(summary) %>%
     filter(term == "condition") %>%
-    mutate(fdr = p.adjust(p.value, method = "BH", n = length(p.value)))
+    dplyr::rename(., P = p.value) %>%
+    mutate(FDR = p.adjust(P, method = "BH", n = length(P)))
   
   # Join to data
   temp.data <- temp.data %>%
-    select(1, p.value, fdr) %>%
+    select(1, P, FDR) %>%
     left_join(data2, ., by = variable)
   
   # Exit
@@ -327,19 +328,19 @@ calculate_fc <- function(data, group.compare, difference = TRUE){
 }
 
 
-add_max_fc <- function(data4){
-  variable <- data4 %>%
+add_fc_max <- function(df){
+  variable <- df %>%
     select(1) %>%
     names()
   
-  temp.data <- data4 %>%
+  temp.data <- df %>%
     select(1, contains("_FC")) %>%
     gather(condition, value, -1) %>%
-    group_by_(variable) %>%
-    summarize(max_FC = if_else(max(value) > abs(min(value)),
+    group_by(!!as.name(variable)) %>%
+    summarize(FC_max = if_else(max(value) > abs(min(value)),
                                    true = max(value),
                                    false = min(value))) %>%
-    left_join(data4, ., by = variable)
+    left_join(df, ., by = variable)
   
 }
 
@@ -360,7 +361,6 @@ calculate_hclust <- function(df, group, k = 3){
     gather(replicate, abundance, -1) %>%
     separate(replicate, into = c("condition", "replicate"), sep = "-") %>%
     group_by(!!as.name(variable), condition) %>%
-    #group_by(.[[1]], condition) %>%
     summarize(mean = mean(abundance)) %>%
     ungroup() %>%
     spread(., condition, mean)
@@ -370,6 +370,9 @@ calculate_hclust <- function(df, group, k = 3){
     select(-1) %>%
     apply(., 1, scale) %>%
     t()
+  
+  # Rename Z-score columns
+  names(temp.data)[-1] <- names(temp.data)[-1] %>% paste0(., "-scaled")
   
   temp.data <- temp.data %>%
     select(-1) %>%
@@ -383,8 +386,8 @@ calculate_hclust <- function(df, group, k = 3){
     bind_cols(temp.data[1], .)# %>% dplyr::rename(., Accession = `.[[1]]`)
   
   # Join to input data
-  temp.data %>%
-    select(1, cluster) %>%
-    left_join(df, ., by = variable)
+  #temp.data %>% select(1, cluster) %>% left_join(df, ., by = variable)
+  
+  return(temp.data)
   
 }
