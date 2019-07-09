@@ -1,4 +1,4 @@
-[link](https://hickslab.github.io/ProgenesisLFQ/)
+[**link**](https://hickslab.github.io/ProgenesisLFQ/)
 
 # *`ProgenesisLFQ`*
 
