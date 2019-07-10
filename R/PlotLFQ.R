@@ -217,44 +217,36 @@ plot_heatmap <- function(df){
 }
 
 
-plot_GO_uniprot <- function(df, top = 5){
+plot_GO <- function(df, top = 5){
+  variable <- df %>%
+    select(1) %>%
+    names()
+  
   # Select GO columns
-  df %>%
-    #filter(fdr < 0.05) %>%
-    #sample_n(., 1000, replace = FALSE) %>%
+  temp.data <- df %>%
     select(contains("Gene ontology")) %>%
     
-    # Melt GO
     gather(column, term) %>%
     mutate(column = str_split(column, "\\(", simplify = TRUE)[, 2] %>% str_sub(., end = -2)) %>%
     
-    # Clean terms
     filter(!is.na(term)) %>%
     separate_rows(term, sep = "; ") %>%
-    #separate(term, into = c("term", "GO"), sep = "\\[", extra = "merge") %>% View
-    mutate(term = str_sub(term, end = -14)) %>%
-    #mutate(GO = str_sub(GO, end = -2)) %>%
-    
-    # Count terms
+    mutate(term = str_sub(term, end = -14))
+  
+  # Count terms
+  temp.data %>%
     group_by(column, term) %>%
     tally() %>%
     
-    # Filter for top terms
     group_by(column) %>%
     top_n(top, n) %>%
-    #slice(1:n())
-    
-    #ggplot(., aes(x = count, fill = column)) + geom_histogram(binwidth = 1) + coord_cartesian(xlim = c(0, 100))
-    
-    #ggplot(., aes(x = reorder(term, count), y = count, color = column)) + geom_point() + coord_flip()
-    
+
     ggplot(., aes(x = reorder(term, n), y = n, fill = column)) +
     geom_bar(stat = "identity") +
-    coord_flip() +
     facet_grid(column ~ ., scales = "free") +
     guides(fill = FALSE) +
     labs(x = NULL, y = "Proteins") +
-    theme(text = element_text(size = 16))
+    coord_flip()
   
 }
 

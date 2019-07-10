@@ -253,5 +253,10 @@ separate_sites <- function(df){
   temp.data <- df %>%
     select(Accession, Sites, everything())
   
+}
+
+
+summarize_uniprot <- function(){
+  
   
 }
