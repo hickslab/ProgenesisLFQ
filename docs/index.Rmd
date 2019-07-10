@@ -433,25 +433,66 @@ data4 <- data2 %>%
 
 ```{r}
 data3 <- data3 %>%
-  calculate_fc(., group.compare, difference = TRUE)
+  calculate_fc(., group.compare, difference = TRUE) %>%
+  add_fc_max()
 
 
 data4 <- data4 %>%
-  calculate_fc(., group.compare, difference = TRUE)
+  calculate_fc(., group.compare, difference = TRUE) %>%
+  add_fc_max()
 
 ```
 
 
 ### Clustering
 
-> Unsupervised
+> Unsupervised heirarchical clustering.
 
 ```{r}
-#data4 %>% calculate_hclust(., group, k = 3)
+data4 <- data4 %>%
+  filter(FDR < 0.05) %>%
+  filter(abs(`0-60_FC`) >= 1) %>%
+  #filter(abs(FC_max) >= 1) %>%
+  
+  calculate_hclust(., group, k = 2) %>%
+  left_join(data4, ., by = data4 %>% select(1) %>% names())
 
 ```
 
 
+# AnnotateLFQ
+
+## Packages
+> Load required packages into R session.
+
+```{r, warning = FALSE, message = FALSE}
+
+
+```
+
+
+## Functions
+
+```{r}
+url <- "https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/"
+
+source_url(paste0(url, "R/AnnotateLFQ.R"))
+
+```
+
+
+## UniProtKB API
+
+> Given a list of protein accessions, access UniProtKB and pull known information.
+
+```{r}
+data5 <- data4 %>%
+  add_missingness(., data, group) %>%
+  keep_entry_uniprot() %>%
+  split_identifier() %>%
+  add_uniprot(., paste0(url, "data/Cr_uniprot_20190130_annotation.tsv"))
+
+```
 
 
 # PlotLFQ
@@ -547,46 +588,30 @@ data3 %>%
 
 ```{r}
 data4 %>%
-  filter(fdr < 0.05) %>%
-  #filter(abs(`0-60_FC`) >= 1) %>%
-  plot_hclust(., group, k = 2) +
+  filter(FDR < 0.05) %>%
+  filter(abs(`0-60_FC`) >= 1) %>%
+  #filter(abs(FC_max) >= 1) %>%
+  
+  plot_hclust(., group, k = 6, type = "line") +
   theme_custom()
 
 ```
 
 
+## Pathway Analysis
 
-
-# AnnotateLFQ
-
-## Packages
-> Load required packages into R session.
-
-```{r, warning = FALSE, message = FALSE}
-
-
-```
-
-
-## Functions
+> Assuming mapped UniProtKB annotations.
 
 ```{r}
-url <- "https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/"
-
-source_url(paste0(url, "R/AnnotateLFQ.R"))
-
-```
-
-
-## UniProtKB API
-
-> Given a list of protein accessions, access UniProtKB and pull known information.
-
-```{r}
-
+data5 %>%
+  filter(FDR < 0.05) %>%
+  filter(abs(`0-60_FC`) >= 1) %>%
+  filter(cluster == "A") %>%
+  #sample_n(., 1000, replace = FALSE) %>%
+  
+  plot_GO(top = 10) + theme_custom()
 
 ```
-
 
 
 
