@@ -58,11 +58,14 @@ reduce_identifiers <- function(df, samples){
     ungroup()
   
   # Column-wise sum
-  temp.df2 <- temp.df %>%
+  temp.df2 <- df %>%
     select(Identifier, samples) %>%
     gather(sample, abundance, -1) %>%
+    mutate(sample = factor(sample, levels = df[, samples] %>% names())) %>%
+    
     group_by(Identifier, sample) %>%
     summarize(sum = sum(abundance)) %>%
+    
     spread(sample, sum) %>%
     ungroup()
   
