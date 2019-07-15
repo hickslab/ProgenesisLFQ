@@ -1,5 +1,5 @@
 reduce_features <- function(df){
-  df %>%
+  temp.df <- df %>%
     # Summarize features with identical peptides - different accessions
     group_by(`#`, Sequence, Modifications, Score) %>%
     top_n(1, `Unique peptides`) %>%
@@ -49,26 +49,28 @@ get_identifier <- function(df, database, mod = "Phospho"){
 }
 
 
-reduce_identifiers <- function(df, group){
+reduce_identifiers <- function(df, samples){
   # Reduce to unique identifiers represented by highest score
   temp.df <- df %>%
     group_by(Identifier) %>%
     top_n(1, Score) %>%
-    slice_(1) %>%
-    arrange(Identifier)
-  
-  # Column-wise sum by group
-  temp.issue <- df %>%
-    group_by(Identifier) %>%
-    select(Identifier, unlist(group)) %>%
-    summarize_all(., funs(sum))
-  
-  # Replace summed abundance in ordered dataset
-  temp.df[, unlist(group)] <- temp.issue[, -1]
-  
-  temp.df %>%
+    dplyr::slice(1) %>%
     ungroup()
   
+  # Column-wise sum
+  temp.df2 <- temp.df %>%
+    select(Identifier, samples) %>%
+    gather(sample, abundance, -1) %>%
+    group_by(Identifier, sample) %>%
+    summarize(sum = sum(abundance)) %>%
+    spread(sample, sum) %>%
+    ungroup()
+  
+  # Replace summed abundance in ordered dataset
+  temp.df[, samples] <- temp.df2[, -1]
+  
+  return(temp.df)
+
 }
 
 
