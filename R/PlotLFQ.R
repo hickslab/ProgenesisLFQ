@@ -59,8 +59,9 @@ plot_pca <- function(df, group){
 plot_volcano <- function(data3, group, group.compare, fdr = TRUE, threshold = 2, xlimit = 10, ylimit = 8){
   # Data preparation
   temp.data <- 	data3 %>%
-	  select(-unlist(group)) %>%
-	  gather(compare, value, -1) %>%
+	  #select(-unlist(group)) %>% View
+	  select(1, matches("_P|_FDR|_FC")) %>%
+    gather(compare, value, -1) %>%
 	  separate(compare,
 	           sep = "_",
 	           into = c("compare", "variable"),
@@ -97,7 +98,7 @@ plot_volcano <- function(data3, group, group.compare, fdr = TRUE, threshold = 2,
     mutate(compare = factor(compare, levels = names(group.compare)),
            type = factor(type, levels = c("same", "down", "up")))
   
-  # 
+  #
   temp.label <- temp.data %>%
     group_by(compare, compare_count) %>%
     count() %>%
@@ -106,7 +107,7 @@ plot_volcano <- function(data3, group, group.compare, fdr = TRUE, threshold = 2,
 	# Plot
 	temp.data %>%
 	  ggplot(., aes(x = FC, y = -log10(significance), color = type)) +
-	  geom_point(size = 3) +
+	  geom_point(size = 3, alpha = 0.8) +
 	  scale_color_manual(values = c("same" = "grey70", "down" = "blue", "up" = "red")) +
 	  coord_cartesian(xlim = c(-xlimit, xlimit), ylim = c(0, ylimit)) +
 	  xlab(expression("log"[2]*"(fold change)")) +
@@ -117,8 +118,12 @@ plot_volcano <- function(data3, group, group.compare, fdr = TRUE, threshold = 2,
 	  facet_wrap(~ compare_count) +
 	  #geom_text(data = temp.label, aes(x = 0, y = Inf, label = compare_count), inherit.aes = FALSE) +
 	  guides(color = FALSE) +
-	  geom_hline(yintercept = -log10(0.05), linetype = 2, size = 1) +
-	  geom_vline(xintercept = c(-log2(threshold), log2(threshold)), linetype = 2, size = 1)
+	  
+	  #scale_x_continuous(breaks = -xlimit:xlimit) +
+	  scale_y_continuous(breaks = -ylimit:ylimit) +
+	  
+	  geom_hline(yintercept = -log10(0.05), linetype = 2, size = 1, color = "black") +
+	  geom_vline(xintercept = c(-log2(threshold), log2(threshold)), linetype = 2, size = 1, color = "black")
 
 }
 
@@ -205,7 +210,7 @@ plot_hclust <- function(df, group, k = 3, type = "jitter"){
  
 plot_heatmap <- function(df){
 
-  temp.data %>%
+  df %>%
     ggplot(., aes(variable, reorder(Identifier, -value))) +
     #ggplot(., aes(variable, Identifier)) +
     geom_tile(aes(fill = value)) +
@@ -247,6 +252,146 @@ plot_GO <- function(df, top = 5){
     guides(fill = FALSE) +
     labs(x = NULL, y = "Proteins") +
     coord_flip()
+  
+}
+
+
+plot_GO_hclust <- function(df, group, column = "Gene ontology (biological process)", threshold = 10){
+  # Define experiment
+  variable <- df %>%
+    select(1) %>%
+    names()
+  
+  # Select abundance columns
+  temp.data <- df %>%
+    select(1, group %>% flatten_int())
+  
+  # Calculate mean condition abundance
+  temp.data <- temp.data %>%
+    gather(replicate, abundance, -1) %>%
+    separate(replicate, into = c("condition", "replicate"), sep = "-") %>%
+    group_by(!!as.name(variable), condition) %>%
+    summarize(mean = mean(abundance)) %>%
+    ungroup() %>%
+    spread(., condition, mean)
+  
+  # Z-score rowwise normalization
+  temp.data[-1] <- temp.data %>%
+    select(-1) %>%
+    apply(., 1, scale) %>%
+    t()
+
+  # Add annotation column
+  temp.data <- df %>%
+    select(1, column) %>%
+    dplyr::rename(column = !!as.name(column)) %>%
+    left_join(temp.data, ., by = variable)
+  
+  # Melt by annotation
+  temp.data <- temp.data %>%
+    mutate(column = str_sub(column, end = -2)) %>%
+    separate_rows(column, sep = ";") %>%
+    gather(condition, scaled, -1, -column) %>%
+    filter(!is.na(column))
+  
+  # Count and threshold
+  temp.data <- temp.data %>%
+    count(!!as.name(variable), column) %>%
+    count(column) %>%
+    left_join(temp.data, ., by = "column") %>%
+    mutate(column_n = str_c(column, "\n", n)) %>%
+    filter(n > threshold)
+    
+  # Plot
+  temp.data %>%
+    ggplot(., aes(x = factor(condition), y = scaled)) +
+    geom_line(aes(group = !!as.name(variable), color = column), size = 1.5) +
+    #geom_smooth(aes(x = jitter(breaks)), method = "loess", size = 1.5) +
+    geom_boxplot(color = "black", fill = NA, outlier.shape = NA, size = 1.5) +
+    #scale_x_discrete(breaks = 1:length(group), labels = names(group)) +
+    guides(color = FALSE, fill = FALSE) +
+    facet_wrap(~ fct_reorder(column_n, n, .desc = TRUE)) +
+    labs(x = "Condition", y = "Z-score")
+  
+}
+
+
+plot_GO_FC <- function(df, group, column = "Gene ontology (biological process)", threshold = 5){
+  # Define experiment
+  variable <- df %>%
+    select(1) %>%
+    names()
+  
+  # Select data
+  temp.df <- df %>%
+    select(1, contains("_FC"))
+           
+  temp.df <- df %>%
+    select(1, column) %>%
+    dplyr::rename(column = !!as.name(column)) %>%
+    left_join(temp.df, ., by = variable)
+  
+  # Melt by annotation
+  temp.df <- temp.df %>%
+    #mutate(column = str_sub(column, end = -2)) %>%
+    separate_rows(column, sep = "; ") %>%
+    gather(condition, scaled, -1, -column) %>%
+    filter(!is.na(column))
+  
+  # Count and threshold
+  temp.df <- temp.df %>%
+    count(!!as.name(variable), column) %>%
+    count(column) %>%
+    left_join(temp.df, ., by = "column") %>%
+    mutate(column_n = str_c(column, "\n", n)) %>%
+    filter(n > threshold)
+  
+  # Plot
+  temp.df %>%
+    ggplot(., aes(x = factor(condition), y = scaled)) +
+    geom_line(aes(group = !!as.name(variable), color = column), size = 1.5) +
+    #geom_smooth(aes(x = jitter(breaks)), method = "loess", size = 1.5) +
+    geom_boxplot(color = "black", fill = NA, outlier.shape = NA, size = 1.5) +
+    #scale_x_discrete(breaks = 1:length(group), labels = names(group)) +
+    guides(color = FALSE, fill = FALSE) +
+    facet_wrap(~ fct_reorder(column_n, n, .desc = TRUE)) +
+    labs(x = "Condition", y = "Fold change")
+  
+}
+
+
+plot_GO_heatmap <- function(., group, column = "Gene ontology", threshold = 5){
+  # Select data
+  temp.df <- df %>%
+    select(1, contains("scaled"))
+  
+  temp.df <- df %>%
+    select(1, column) %>%
+    dplyr::rename(column = !!as.name(column)) %>%
+    left_join(temp.df, ., by = variable)
+  
+  # Melt by annotation
+  temp.df <- temp.df %>%
+    #mutate(column = str_sub(column, end = -2)) %>%
+    separate_rows(column, sep = "; ") %>%
+    gather(condition, scaled, -1, -column) %>%
+    filter(!is.na(column))
+  
+  # Count and threshold
+  temp.df <- temp.df %>%
+    count(!!as.name(variable), column) %>%
+    count(column) %>%
+    left_join(temp.df, ., by = "column") %>%
+    mutate(column_n = str_c(column, "\n", n)) %>%
+    filter(n > threshold)
+  
+  # Plot
+  temp.df %>%
+    ggplot(., aes(x = condition, y = Identifier, size = scaled)) +
+    #geom_tile(aes(fill = scaled)) +
+    geom_count() +
+    facet_grid(fct_reorder(column_n, n, .desc = TRUE) ~ ., scales = "free") +
+    guides(color = FALSE)# + theme_custom()
   
 }
 
