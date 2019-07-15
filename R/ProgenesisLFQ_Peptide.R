@@ -61,30 +61,6 @@ reduce_features <- function(data){
 }
 
 
-reduce_features_tidy <- function(data){
-  data %>%
-    # Summarize features with identical peptides - different accessions
-    group_by(`#`, Sequence, Modifications, Score) %>%
-    top_n(1, `Unique peptides`) %>%
-    top_n(1, `Confidence score`) %>%
-    slice_(1) %>%
-    
-    # Summarize features with multiple peptides
-    group_by(`#`) %>%
-    top_n(1, Score) %>%
-    slice_(1) %>%
-    ungroup()
-  
-}
-
-
-get_identifier_peptide <- function(data){
-  data %>%
-    mutate(Identifier = paste(Accession, Sequence, sep = "--"))
-  
-}
-
-
 filter_redox <- function(pepm, reduced = "IAM", oxidized = "Empty"){
   if (reduced == "IAM"){
     mod <- "Carbamidomethyl"
@@ -104,20 +80,6 @@ filter_redox <- function(pepm, reduced = "IAM", oxidized = "Empty"){
       filter(., str_count(Sequence, "C") > str_count(Modifications, mod))
     
   }
-}
-
-
-filter_redox_tidy <- function(pepm, reduced = "Nethylmaleimide"){
-  # Default Mascot variable modifications:
-  # IAM = Carbamidomethyl
-  # NEM = Nethylmaleimide
-  
-  temp.data <- pepm %>%
-    mutate(Modifications = replace_na(Modifications, "")) %>%
-    #mutate(Cys = str_count(Sequence, "C")) %>%
-    #mutate(Mod = str_count(Modifications, reduced)) %>%
-    filter(., str_count(Sequence, "C") > str_count(Modifications, reduced))
-  
 }
 
 
@@ -160,46 +122,6 @@ get_identifier_redox <- function(data, database, reduced = "IAM"){
   # Return clean dataframe
   temp.data <- temp.data %>%
     select(-Modified, -Residue, -Start) %>%
-    ungroup()
-  
-}
-
-
-filter_phospho <- function(data){
-  data %>%
-    filter(., grepl("Phospho", Modifications))
-  
-}
-
-
-get_identifier_phospho <- function(data, database){
-  # Map integer position of modification
-  temp.data <- data %>%
-    mutate(Identifier = str_split(as.character(Modifications), "\\|") %>%
-             lapply(., str_subset, "Phospho") %>%
-             lapply(., str_extract, "(?<=\\[)(.*)(?=\\])") %>%
-             lapply(., as.numeric))
-  
-  # Map modified residue by position
-  temp.data <- temp.data %>%
-    rowwise() %>%
-    mutate(Residue = str_sub(Sequence, Identifier, Identifier) %>% list())
-  
-  # Map position of peptide to protein
-  temp.data <- temp.data %>%
-    mutate(Start = str_locate_all(database[Accession], as.character(Sequence))[[1]][[1]] %>%
-             list())
-  
-  # Build identifier
-  temp.data <- temp.data %>%
-    mutate(Identifier = (Identifier + Start - 1) %>%
-             paste(Residue, ., sep = "") %>%
-             paste(., collapse = "-") %>%
-             paste(Accession, ., sep = "--"))
-  
-  # Return clean dataframe
-  temp.data <- temp.data %>%
-    select(-Residue, -Start) %>%
     ungroup()
   
 }
