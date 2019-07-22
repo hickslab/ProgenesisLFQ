@@ -1,5 +1,5 @@
 ---
-title: "Progenesis QIP"
+title: "ProgenesisLFQ"
 output:
   html_document:
     theme: journal
@@ -20,11 +20,14 @@ output:
 ```{r setup, include = FALSE}
 require(knitr)
 opts_chunk$set(echo = TRUE)
+opts_knit$set(root.dir = "~/ProgenesisLFQ/data")
 
 ```
 
 
 # ProteinLFQ
+
+> Protein-Level Label-Free Quantification
 
 
 ## Packages
@@ -33,17 +36,6 @@ opts_chunk$set(echo = TRUE)
 ```{r, warning = FALSE, message = FALSE}
 library(devtools)
 library(tidyverse)
-library(Biostrings)
-
-```
-
-
-## Functions
-
-```{r}
-url <- "https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/"
-
-source_url(paste0(url, "R/ProgenesisLFQ_Global.R"))
 
 ```
 
@@ -52,13 +44,12 @@ source_url(paste0(url, "R/ProgenesisLFQ_Global.R"))
 > Load Protein Measurements spreadsheet exported from Progenesis.
 
 ```{r warning = FALSE}
-protm <- "data/20180502_WOS52_Cr_UPS_protm.csv" %>%
-  paste0(url, .) %>%
+protm <- "20180502_WOS52_Cr_UPS_protm.csv" %>%
   read_csv(., skip = 2, col_types = cols())
 
 ```
 
-> Separte leading protein accession from group members.
+> Separate leading protein accession from group members.
 
 * Some protein accessions were grouped together by semicolons (;) in the data. These groups represent homologous proteins with shared peptide identifications. The first accession in each group is generally the most confident inference and is used for analysis, other accessions are considered group members.
 
@@ -110,34 +101,9 @@ data
 ```
 
 
-> Example plot construction.
+# PhosphoLFQ
 
-```{r}
-plot_jitter <- function(df){
-  temp.df <- df %>%
-    gather(sample, abundance, -1)
-  
-  temp.df %>%  
-    ggplot(., aes(x = sample, y = abundance, color = sample)) +
-    geom_jitter(alpha = 0.5) +
-    geom_boxplot(color = "black",
-                 fill = NA,
-                 outlier.shape = NA,
-                 size = 1.5) +
-    guides(color = FALSE, fill = FALSE) +
-    theme_classic(base_size = 32) +
-    coord_flip()
-
-}
-
-data %>% plot_jitter()
-
-```
-
-
-# PeptideLFQ
-
-> Peptide-Level Quantification
+> Phosphosite-Level Label-Free Quantification
 
 * During raw MS file processing, Progenesis subdivided each LC-MS run into peak features, which are MS1 precursor ions with a defined isotopic cluster with characteristic retention time and monoisotopic mass. The same peak feature coordinates are assigned for every LC-MS run and the summed intensity (abundance) from each is recorded.
 
@@ -150,9 +116,9 @@ data %>% plot_jitter()
 > Load required packages into R session.
 
 ```{r, warning = FALSE, message = FALSE}
+library(Biostrings)
 library(devtools)
 library(tidyverse)
-library(Biostrings)
 
 ```
 
@@ -161,41 +127,17 @@ library(Biostrings)
 
 ```{r}
 url <- "https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/"
-
-source_url(paste0(url, "R/ProgenesisLFQ_Peptide.R"))
+source_url(paste0(url, "R/ProcessLFQ.R"))
 
 ```
 
 
 ## Workflow
 
-### Peptides
 > Load Peptide Measurements spreadsheet exported from Progenesis.
 
 ```{r warning = FALSE}
-pepm <- "data/20180502_WOS52_Cr_UPS_pepm.csv" %>%
-  paste0(url, .) %>%
-  read_csv(., skip = 2, col_types = cols())
-
-```
-
-
-> Load Protein Measurements spreadsheet exported from Progenesis.
-
-```{r warning = FALSE}
-protm <- "data/20180502_WOS52_Cr_UPS_protm.csv" %>%
-  paste0(url, .) %>%
-  read_csv(., skip = 2, col_types = cols())
-
-```
-
-
-### Redox
-> Load Peptide Measurements spreadsheet exported from Progenesis.
-
-```{r warning = FALSE}
-pepm <- "data/20190123_EWM_AZD1_R_rank-lessthan11-include_uniprot_pepm.csv" %>%
-  paste0(url, .) %>%
+pepm <- "20190715_EWM_TOR1_Phospho_pepm.csv" %>%
   read_csv(., skip = 2, col_types = cols())
 
 pepm
@@ -206,8 +148,7 @@ pepm
 > Load Protein Measurements spreadsheet exported from Progenesis.
 
 ```{r warning = FALSE}
-protm <- "data/20190123_EWM_AZD1_R_rank-lessthan11-include_uniprot_protm.csv" %>%
-  paste0(url, .) %>%
+protm <- "20190715_EWM_TOR1_Phospho_protm.csv" %>%
   read_csv(., skip = 2, col_types = cols()) %>%
   select(1:4) %>%
   separate_rows(., Accession, sep = ";")
@@ -220,8 +161,7 @@ protm
 > Load protein sequence database.
 
 ```{r}
-database <- "data/Cr_uniprot_crap_20190130.fasta" %>%
-  paste0(url, .) %>%
+database <- "Cr_uniprot_crap_20190130.fasta" %>%
   readAAStringSet(.)
 
 names(database) <- str_split(names(database), " ", simplify = TRUE)[, 1]
@@ -233,7 +173,7 @@ database
 > Define column indeces for the normalized abundance values.
 
 ```{r}
-#pepm %>% names()
+pepm %>% names()
 
 ```
 
@@ -245,7 +185,7 @@ samples
 ```
 
 
-> Filter to keep peptides with Percolator-adjusted Mascot scores > 13 (*p*-value < 0.05).
+> Filter to keep peptides with Percolator-adjusted Mascot scores > 13.
 
 > Filter to remove peptides from proteins in the contaminant database.
 
@@ -259,9 +199,11 @@ samples
     
 * Some features were duplicated with differing peptide identifications and were reduced to a single peptide with the highest Mascot ion score.
 
-> Filter to remove peptides without an indirect site of Cys oxidation.
+> Filter to keep only modified peptides.
 
-* ASDFGH
+* The pattern is mutable depending on what variable modifications were included for the database search.
+
+* The default case is "Phospho" to specify phosphorylation from a Mascot database search. Able to change to "Phospho (ST)" or "Phospho (Y)" to specify modified residues.
 
 > Build an identifier term.
 
@@ -282,32 +224,16 @@ data <- pepm %>%
   filter(Score > 13) %>%
   filter(Description != "cRAP") %>%
   left_join(., protm, by = "Accession") %>%
-  #reduce_features() %>%
-  #filter_redox(., reduced = "NEM") %>%
-  reduce_features_tidy() %>%
-  filter_redox_tidy(reduced = "Nethylmaleimide") %>%
-  get_identifier_redox(database = database, reduced = "NEM") %>%
-  reduce_identifiers(group = samples) %>%
+  reduce_features() %>%
+  filter(str_detect(Modifications, "Phospho")) %>%
+  get_identifier(., database, mod = "Phospho") %>%
+  reduce_identifiers(., samples) %>%
   select(Identifier, samples) %>%
   data.frame()
 
 data
 
 ```
-
-
-### Variable Modification
-```{r}
-
-```
-
-
-### Phosphorylation
-
-```{r}
-
-```
-
 
 
 # StatLFQ
@@ -326,7 +252,6 @@ library(broom)
 
 ```{r}
 url <- "https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/"
-
 source_url(paste0(url, "R/StatLFQ.R"))
 
 ```
@@ -337,8 +262,7 @@ source_url(paste0(url, "R/StatLFQ.R"))
 > Define input data.
 
 ```{r}
-data <- "data/20180502_WOS52_Cr_UPS_protm_Process.csv" %>%
-  paste0(url, .) %>%
+data <- "20180502_WOS52_Cr_UPS_protm_processed.csv" %>%
   read_csv(., col_types = cols()) %>%
   data.frame()
 
@@ -354,7 +278,7 @@ a <- 2:5; b <- 6:9; c <- 10:13 # ???
 
 group <- list("25" = a, "50" = b, "100" = c) # ???
 
-group.compare <- list("25-50" = list(a, b),
+group.compare <- list("25-50" = list(a, b), # ???
                       "25-100" = list(a, c),
                       "50-100" = list(b, c))
 
@@ -380,9 +304,13 @@ data %>% names()
 
 > Filter to keep identifiers with >50% of replicates having nonzero abundances in any condition.
 
-> Perform a log~2~-transformation of abundances as a variance-stabilization. The base R function *log2()* returns "-Inf" for zero values. These instances are changed to "NA" following the transformation.
+> Perform a log~2~-transformation of abundances as a variance-stabilization.
 
-> Impute missing values ("NA") using a conditional strategy with the `imp4p` package. Iterate by condition and check if each idenfifier has reliable quantitation.
+* The base R function *log2()* returns "-Inf" for zero values. These instances are changed to "NA" following the transformation.
+
+> Impute missing values ("NA") using a conditional strategy with the `imp4p` package.
+
+* Iterate by condition and check if each idenfifier has reliable quantitation.
 
 * If at least one replicate has a nonzero abundance, impute other replicates with values drawn from a normal distribution centered on the mean of nonzero replicates.
 
@@ -393,8 +321,6 @@ data2 <- data %>%
   clean_min(., group, nonzero = 3) %>%
   transform_data(., group, method = "log2") %>%
   impute_imp4p(., group)
-
-data2 %>% plot_jitter()
 
 ```
 
@@ -451,7 +377,7 @@ data4 <- data4 %>%
 ```{r}
 data4 <- data4 %>%
   filter(FDR < 0.05) %>%
-  filter(abs(`0-60_FC`) >= 1) %>%
+  #filter(abs(`0-60_FC`) >= 1) %>%
   #filter(abs(FC_max) >= 1) %>%
   
   calculate_hclust(., group, k = 2) %>%
@@ -475,22 +401,21 @@ data4 <- data4 %>%
 
 ```{r}
 url <- "https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/"
-
 source_url(paste0(url, "R/AnnotateLFQ.R"))
 
 ```
 
 
-## UniProtKB API
+## Annotation
 
-> Given a list of protein accessions, access UniProtKB and pull known information.
+> Given a list of protein accessions, access UniProt and pull known information.
 
-```{r}
+```{r eval = FALSE}
 data5 <- data4 %>%
-  add_missingness(., data, group) %>%
-  keep_entry_uniprot() %>%
-  split_identifier() %>%
-  add_uniprot(., paste0(url, "data/Cr_uniprot_20190130_annotation.tsv"))
+  add_missingness(., data, group)
+  #keep_entry_uniprot() %>%
+  #split_identifier() %>%
+  #add_uniprot(., paste0(url, "data/Cr_uniprot_20190130_annotation.tsv"))
 
 ```
 
@@ -510,7 +435,6 @@ data5 <- data4 %>%
 
 ```{r}
 url <- "https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/"
-
 source_url(paste0(url, "R/PlotLFQ.R"))
 
 ```
@@ -525,48 +449,64 @@ theme_custom <- function(base_size = 32){
   theme_bw(base_size = base_size) %+replace%
     theme(
       strip.background = element_blank(),
-      #strip.text.x = element_text(size = 18),
-      #strip.text.y = element_text(size = 18),
-      #axis.text.x = element_text(size=14),
-      #axis.text.y = element_text(size=14,hjust=1),
-      axis.ticks =  element_line(colour = "black"), 
-      #axis.title.x= element_text(size=16),
-      #axis.title.y= element_text(size=16,angle=90),
-      panel.background = element_blank(), 
-      panel.border = element_blank(), 
-      panel.grid.major = element_blank(), 
+      axis.ticks =  element_line(colour = "black"),
+      panel.background = element_blank(),
+      panel.border = element_blank(),
+      panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(), 
-      #panel.margin = unit(1.0, "lines"), 
-      plot.background = element_blank(), 
+      plot.background = element_blank(),
       plot.margin = unit(c(0.5,  0.5, 0.5, 0.5), "lines"),
       axis.line.x = element_line(color="black", size = 1),
       axis.line.y = element_line(color="black", size = 1)
     )
 }
 
-theme_custom2 <- function(){
-  theme_classic(base_size = 32) %+replace%
-    theme(
-      strip.background = element_blank()
-      
-    )
+```
+
+
+## Example
+
+> Custom plot function.
+
+```{r}
+plot_jitter <- function(df, group){
+  temp.df <- df %>%
+    select(1, group %>% flatten_int()) %>%
+    gather(sample, abundance, -1)
+  
+  temp.df %>%  
+    ggplot(., aes(x = sample, y = abundance, color = sample)) +
+    geom_jitter(alpha = 0.5) +
+    geom_boxplot(color = "black",
+                 fill = NA,
+                 outlier.shape = NA,
+                 size = 1.5) +
+    guides(color = FALSE, fill = FALSE) +
+    coord_flip()
+
 }
+
+data2 %>%
+  plot_jitter(., group) +
+  theme_custom()
 
 ```
 
 ## PCA
 
-> Principal component analysis (PCA)
+> Principal component analysis (PCA).
 
 ```{r}
-data2 %>% plot_pca(., group)# + theme_custom()
+data2 %>%
+  plot_pca(., group) +
+  theme_custom()
 
 ```
 
 
 ## Volcano Plot
 
-> Biological versus statistical significance
+> Biological versus statistical significance.
 
 ```{r}
 data3 %>%
@@ -576,7 +516,7 @@ data3 %>%
                  fdr = TRUE,
                  threshold = 2,
                  xlimit = 8,
-                 ylimit = 8) +
+                 ylimit = 5) +
   theme_custom()
 
 ```
@@ -589,10 +529,10 @@ data3 %>%
 ```{r}
 data4 %>%
   filter(FDR < 0.05) %>%
-  filter(abs(`0-60_FC`) >= 1) %>%
+  #filter(abs(`0-60_FC`) >= 1) %>%
   #filter(abs(FC_max) >= 1) %>%
   
-  plot_hclust(., group, k = 6, type = "line") +
+  plot_hclust(., group, k = 2) +
   theme_custom()
 
 ```
@@ -600,16 +540,26 @@ data4 %>%
 
 ## Pathway Analysis
 
-> Assuming mapped UniProtKB annotations.
+> Assuming data contains mapped UniProt annotations.
 
-```{r}
+```{r eval = FALSE}
 data5 %>%
   filter(FDR < 0.05) %>%
-  filter(abs(`0-60_FC`) >= 1) %>%
-  filter(cluster == "A") %>%
+  #filter(abs(`0-60_FC`) >= 1) %>%
+  #filter(cluster == "A") %>%
   #sample_n(., 1000, replace = FALSE) %>%
   
-  plot_GO(top = 10) + theme_custom()
+  plot_GO(top = 5) + theme_custom()
+
+
+data5 %>%
+  filter(FDR < 0.05) %>%
+  filter(`0-60_FC` >= 1) %>%
+  #filter(cluster == "A") %>%
+  plot_GO_hclust(., group, column = "Gene ontology (biological process)", threshold = 3) +
+  #plot_GO_FC(., group, column = "Gene ontology (biological process)", threshold = 1) +
+  theme_custom()
+  
 
 ```
 
@@ -633,6 +583,7 @@ data5 %>%
 
 ```{r}
 #pdf("figure.pdf", width = 10, height = 10)
+
 #png("figure.png", width = 12, height = 9, units = "in", res = 300)
 # RUN PLOT
 #dev.off()
