@@ -19,7 +19,7 @@ exchange_gene <- function(data, variable, organism){
                       sep = "\t",
                       header = TRUE,
                       stringsAsFactors = FALSE)
-
+  
   # Clean UniProt table
   annot <- annot %>%
     rename(Accession = Entry,
@@ -31,7 +31,7 @@ exchange_gene <- function(data, variable, organism){
              extra = "drop") %>%
     select(-Extra) %>%
     mutate(Gene = str_to_upper(Gene))
-
+  
   if (variable == "Accession"){
     # Clean data accession from UniProt
     temp.data <- data %>%
@@ -185,16 +185,16 @@ add_missingness <- function(df, raw, group){
              into = c("condition", "replicate"),
              sep = "-") %>%
     #select(-replicate) %>%
-    group_by_(variable, "condition") %>%
+    group_by(!!as.name(variable), "condition") %>%
     summarize(sum = sum(value), missing = sum == 0) %>%
     filter(missing == TRUE)
   
   # Add column with groups completely missing
   temp.raw <- temp.raw %>%
-    group_by_(variable) %>%
-    mutate(Missing = paste(condition, collapse = "-")) %>%
-    distinct_(., variable, .keep_all = TRUE) %>%
-    select(variable, Missing)
+    group_by(!!as.name(variable)) %>%
+    mutate(missing = paste(condition, collapse = "-")) %>%
+    distinct(., !!as.name(variable), .keep_all = TRUE) %>%
+    select(variable, missing)
   
   # Join missingness column onto data
   temp.data <- df %>%
