@@ -1,3 +1,20 @@
+theme_custom <- function(base_size = 32){
+  theme_bw(base_size = base_size) %+replace%
+    theme(
+      strip.background = element_blank(),
+      axis.ticks =  element_line(colour = "black"),
+      panel.background = element_blank(), 
+      panel.border = element_blank(), 
+      panel.grid.major = element_blank(), 
+      panel.grid.minor = element_blank(),
+      plot.background = element_blank(), 
+      plot.margin = unit(c(0.5,  0.5, 0.5, 0.5), "lines"),
+      axis.line.x = element_line(color="black", size = 1),
+      axis.line.y = element_line(color="black", size = 1)
+    )
+}
+
+
 plot_corr <- function(data, group = group) {
   # Load packages
   library(broom)
