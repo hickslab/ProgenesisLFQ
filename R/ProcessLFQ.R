@@ -18,7 +18,7 @@ reduce_features <- function(df){
 get_identifier <- function(df, database, mod = "Phospho"){
   # Separate to one modification per row
   temp.df <- df %>%
-    select(1, Accession, Sequence, Modifications) %>%
+    select(`#`, Accession, Sequence, Modifications) %>%
     separate_rows(Modifications, sep = "\\|") %>%
     filter(str_detect(Modifications, mod))
   
@@ -42,7 +42,7 @@ get_identifier <- function(df, database, mod = "Phospho"){
   
   # Join identifier column to input data
   temp.df %>%
-    select(1, Identifier) %>%
+    select(`#`, Identifier) %>%
     distinct() %>%
     inner_join(df, ., by = "#")
   
@@ -78,10 +78,6 @@ reduce_identifiers <- function(df, samples){
 
 
 filter_redox <- function(df, reduced = "Nethylmaleimide"){
-  # Default Mascot variable modifications:
-  # IAM = Carbamidomethyl
-  # NEM = Nethylmaleimide
-  
   temp.df <- df %>%
     mutate(Modifications = replace_na(Modifications, "")) %>%
     filter(., str_count(Sequence, "C") > str_count(Modifications, reduced))
@@ -90,14 +86,10 @@ filter_redox <- function(df, reduced = "Nethylmaleimide"){
 
 
 get_identifier_redox <- function(df, database, reduced = "Nethylmaleimide"){
-  # Default Mascot variable modifications:
-  # IAM = Carbamidomethyl
-  # NEM = Nethylmaleimide
-  
   # Map integer position of modification
   temp.df <- df %>%
     mutate(Modified = str_split(as.character(Modifications), "\\|") %>%
-             lapply(., str_subset, mod) %>%
+             lapply(., str_subset, reduced) %>%
              lapply(., str_extract, "(?<=\\[)(.*)(?=\\])") %>%
              lapply(., as.numeric))
   
@@ -125,46 +117,22 @@ get_identifier_redox <- function(df, database, reduced = "Nethylmaleimide"){
   temp.df <- temp.df %>%
     select(-Modified, -Residue, -Start) %>%
     ungroup()
-  
+
 }
-
-
-
-get_identifier_redox_tidy <- function(df, database, reduced = "Nethylmaleimide"){
-  # Default Mascot variable modifications:
-  # IAM = Carbamidomethyl
-  # NEM = Nethylmaleimide
   
-  # Map integer position of modification
+  
+get_identifier_redox2 <- function(df, database, reduced = "Nethylmaleimide"){
+  # TODO
+  
+  # Locate each Cys residue and separate into rows
   temp.df <- df %>%
-    mutate(Modified = str_split(as.character(Modifications), "\\|") %>%
-             lapply(., str_subset, mod) %>%
-             lapply(., str_extract, "(?<=\\[)(.*)(?=\\])") %>%
-             lapply(., as.numeric))
-  
-  # Map position of residue to peptide
-  temp.df <- temp.df %>%
+    select(`#`, Accession, Sequence, Modifications) %>%
     rowwise() %>%
-    mutate(Residue = str_locate_all(Sequence, "C")[[1]][, 1] %>% list())
+    mutate(Cys = str_locate_all(Sequence, "C")[[1]][, 1] %>% paste(., collapse = "-")) %>%
+    separate_rows(Cys, sep = "-")
   
-  # Map unmodified position of residue on peptide
-  temp.df <- temp.df %>%
-    mutate(Residue = setdiff(Residue, Modified) %>% list())
-  
-  # Map position of peptide to protein
-  temp.df <- temp.df %>%
-    mutate(Start = str_locate(database[Accession], Sequence)[[1]])
-  
-  # Build identifier
-  temp.df <- temp.df %>%
-    mutate(Identifier = (Residue + Start - 1) %>%
-             paste("C", ., sep = "") %>%
-             paste(., collapse = "-") %>%
-             paste(Accession, ., sep = "--"))
-  
-  # Return clean dataframe
-  temp.df <- temp.df %>%
-    select(-Modified, -Residue, -Start) %>%
-    ungroup()
+  # Separate modifications and remove blocked Cys
+  temp.df %>%
+    separate_rows(Modifications, sep = "\\|")
   
 }
