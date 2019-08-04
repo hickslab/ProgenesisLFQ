@@ -1,5 +1,5 @@
 ---
-title: "ProgenesisLFQ"
+title: "QuantifyR"
 output:
   html_document:
     theme: journal
@@ -25,13 +25,15 @@ opts_knit$set(root.dir = "~/ProgenesisLFQ/data")
 ```
 
 
-# ProteinLFQ
+# Process
 
+
+## Global
 > Protein-Level Label-Free Quantification
 
 
-## Packages
-**Load required packages into R session.**
+### Packages
+> Load required packages into R session.
 
 ```{r, warning = FALSE, message = FALSE}
 library(devtools)
@@ -40,7 +42,7 @@ library(tidyverse)
 ```
 
 
-## Workflow
+### Workflow
 > Load Protein Measurements spreadsheet exported from Progenesis.
 
 ```{r warning = FALSE}
@@ -101,7 +103,7 @@ data
 ```
 
 
-# PhosphoLFQ
+## PTM
 
 > Phosphosite-Level Label-Free Quantification
 
@@ -112,7 +114,7 @@ data
 * The Peptide Measurements export from Progenesis contains the normalized abundances, raw abundances, and spectral counts for each identified peptide that was mapped to a MS1 peak feature in each raw file.
 
 
-## Packages
+### Packages
 > Load required packages into R session.
 
 ```{r, warning = FALSE, message = FALSE}
@@ -123,7 +125,7 @@ library(tidyverse)
 ```
 
 
-## Functions
+### Functions
 
 ```{r}
 url <- "https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/"
@@ -132,7 +134,7 @@ source_url(paste0(url, "R/ProcessLFQ.R"))
 ```
 
 
-## Workflow
+### Workflow
 
 > Load Peptide Measurements spreadsheet exported from Progenesis.
 
@@ -236,7 +238,7 @@ data
 ```
 
 
-# StatLFQ
+# Analyze
 
 ## Packages
 > Load required packages into R session.
@@ -377,16 +379,14 @@ data4 <- data4 %>%
 ```{r}
 data4 <- data4 %>%
   filter(FDR < 0.05) %>%
-  #filter(abs(`0-60_FC`) >= 1) %>%
-  #filter(abs(FC_max) >= 1) %>%
   
   calculate_hclust(., group, k = 2) %>%
-  left_join(data4, ., by = data4 %>% select(1) %>% names())
+  left_join(data4, ., by = data4 %>% names()[1])
 
 ```
 
 
-# AnnotateLFQ
+# Annotate
 
 ## Packages
 > Load required packages into R session.
@@ -420,7 +420,7 @@ data5 <- data4 %>%
 ```
 
 
-# PlotLFQ
+# Plot
 
 ## Packages
 > Load required packages into R session.
@@ -584,9 +584,11 @@ data5 %>%
 ```{r}
 #pdf("figure.pdf", width = 10, height = 10)
 
-#png("figure.png", width = 12, height = 9, units = "in", res = 300)
+#png("figure.png", width = 12, height = 9, units = "in", res = 600)
 # RUN PLOT
 #dev.off()
+
+# TODO plot_save()
 
 ```
 
