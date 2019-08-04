@@ -24,7 +24,8 @@ get_identifier <- function(df, database, mod = "Phospho"){
   
   # Get the modification position and residue from the peptide
   temp.df <- temp.df %>%
-    mutate(position = str_extract(Modifications, "(?<=\\[)(.*)(?=\\])") %>% as.numeric()) %>%
+    mutate(position = str_extract(Modifications, "(?<=\\[)(.*)(?=\\])") %>%
+             as.numeric()) %>%
     mutate(residue = str_sub(Sequence, start = position, end = position))
   
   # Get the modification site from the protein

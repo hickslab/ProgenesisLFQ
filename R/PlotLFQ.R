@@ -63,12 +63,12 @@ plot_pca <- function(df, group){
     data.frame() %>%
     rownames_to_column() %>%
     separate(rowname, into = c("condition", "replicate"), sep = "-") %>%
+    
     ggplot(., aes(x = PC1, y = PC2, color = condition, label = replicate)) +
-    geom_point(alpha = 0.5, size = 10) +
+    geom_point(alpha = 0.5, size = 20) +
+    geom_text(color = "black", size = 10) +
     scale_color_discrete(limits = names(group)) +
-    #theme_bw(base_size = 20) +
-    #theme(text = element_text(size = 20)) +
-    geom_text(color = "black")
+    labs(color = "Condition")
   
 }
 
@@ -240,34 +240,77 @@ plot_heatmap <- function(df){
 
 
 plot_GO <- function(df, top = 5){
-  variable <- df %>%
-    select(1) %>%
-    names()
-  
   # Select GO columns
-  temp.data <- df %>%
-    select(contains("Gene ontology")) %>%
+  temp.df <- df %>%
+    #select(contains("Gene ontology")) %>%
+    #gather(column, term) %>%
     
-    gather(column, term) %>%
+    select(Accession, contains("Gene ontology")) %>%
+    distinct(., Accession, .keep_all = TRUE) %>%
+    gather(column, term, -1) %>%
+    
     mutate(column = str_split(column, "\\(", simplify = TRUE)[, 2] %>% str_sub(., end = -2)) %>%
     
     filter(!is.na(term)) %>%
     separate_rows(term, sep = "; ") %>%
-    mutate(term = str_sub(term, end = -14))
-  
-  # Count terms
-  temp.data %>%
-    group_by(column, term) %>%
-    tally() %>%
+    mutate(term = str_sub(term, end = -14)) %>%
+    mutate(term = str_trunc(term, 50))
     
+  # Count terms
+  temp.df %>%
+    count(column, term) %>%
+
     group_by(column) %>%
-    top_n(top, n) %>%
+    top_n(., top, n) %>%
+    dplyr::slice(1:top) %>%
 
     ggplot(., aes(x = reorder(term, n), y = n, fill = column)) +
     geom_bar(stat = "identity") +
     facet_grid(column ~ ., scales = "free") +
     guides(fill = FALSE) +
     labs(x = NULL, y = "Proteins") +
+    coord_flip()
+  
+}
+
+
+plot_GO_cluster <- function(df, column = "Gene ontology", top = 5){
+  # Select columns
+  temp.df <- df %>%
+    select(Accession, Cluster, contains(column)) %>%
+    distinct(., Accession, .keep_all = TRUE) %>%
+    gather(column, term, -1, -Cluster) %>%
+    
+    mutate(column = str_split(column, "\\(", simplify = TRUE)[, 2] %>% str_sub(., end = -2)) %>%
+    
+    filter(!is.na(term)) %>%
+    separate_rows(term, sep = "; ") %>%
+    mutate(term = str_sub(term, end = -14)) %>%
+    mutate(term = str_trunc(term, 50))
+  
+  # Count terms
+  temp.df <- temp.df %>%
+    count(column, term, Cluster)
+  
+  # Filter for top terms in each cluster
+  temp.df <- temp.df %>%
+    group_by(column, Cluster) %>%
+    top_n(., top, n) %>%
+    dplyr::slice(1:top) %>%
+    mutate(rank = TRUE) %>%
+    ungroup() %>%
+    select(term, rank) %>%
+    left_join(temp.df, ., by = "term") %>%
+    filter(rank == TRUE)
+  
+  # Plot
+  temp.df %>%
+    ggplot(., aes(x = reorder(term, n), y = Cluster)) +
+    geom_raster(aes(fill = column, alpha = n)) + geom_text(aes(label = n), size = 6) + scale_alpha_continuous(range = c(0.5, 1)) +
+    #geom_point(size = 10, color = "grey90") + geom_point(aes(color = Cluster, size = n)) + scale_size_continuous(range = c(2, 10)) +
+    facet_grid(column ~ ., scales = "free") +
+    guides(color = FALSE, fill = FALSE, alpha = FALSE, size = FALSE) +
+    labs(x = NULL, y = "Cluster", alpha = "Proteins") +
     coord_flip()
   
 }
@@ -509,5 +552,29 @@ plot_fc_density <- function(df, group){
   ggplot(., aes(x = value, fill = compare)) +
     geom_density(alpha = 0.5)
   
+  
+}
+
+
+plot_2venn <- function(df){
+  library(ggforce)
+  
+  df <- tibble(label = c("A", "B"),
+               x = c(-1, 1),
+               y = c(0, 0))
+  
+  df %>%
+    ggplot(., aes(x0 = x, y0 = y, r = 2, fill = label)) +
+    geom_circle(alpha = 0.5)
+  
+}
+
+
+plot_save <- function(p, dpi = 300){
+  png("figure.png", width = 12, height = 9, units = "in", res = dpi)
+  
+  print(p)
+  
+  dev.off()
   
 }

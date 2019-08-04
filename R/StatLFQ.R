@@ -1,14 +1,3 @@
-load_simple <- function(name, type = ".csv"){
-  if (type == ".csv"){
-    data <- read.csv(name, stringsAsFactors = FALSE)
-    
-  } else if (type == ".txt"){
-    data <- read.table(name, header = TRUE, sep = "\t", stringsAsFactors = FALSE)
-    
-  }
-}
-
-
 rename_columns <- function(df, group){
   variable <- df %>%
     select(1) %>%
@@ -76,7 +65,6 @@ transform_data <- function(data, group = group, method = "log2"){
 
 normalize_data <- function(data){
   # Would this help following data reduction/filtering?
-  
   
 }
 
@@ -372,22 +360,20 @@ calculate_hclust <- function(df, group, k = 3){
     t()
   
   # Rename Z-score columns
-  names(temp.data)[-1] <- names(temp.data)[-1] %>% paste0(., "-scaled")
+  names(temp.data)[-1] <- names(temp.data)[-1] %>% paste0(., "_Z")
   
   temp.data <- temp.data %>%
     select(-1) %>%
     
-    mutate(cluster = dist(.) %>%
+    mutate(Cluster = dist(.) %>%
              hclust() %>%
              cutree(k)) %>%
     
-    mutate(cluster = LETTERS[cluster]) %>%
+    mutate(Cluster = LETTERS[Cluster]) %>%
     
-    bind_cols(temp.data[1], .)# %>% dplyr::rename(., Accession = `.[[1]]`)
+    bind_cols(temp.data[1], .)
   
-  # Join to input data
-  #temp.data %>% select(1, cluster) %>% left_join(df, ., by = variable)
-  
+  # Exit
   return(temp.data)
   
 }
