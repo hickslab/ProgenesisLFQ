@@ -1,8 +1,8 @@
 # RedoxLFQ
-# Reversibly oxidized Cys-level label-free quantification workflow
+# Reversibly Oxidized Cys-Level Label-Free Quantification
 
 
-# ProcessLFQ ----
+# Process ----
 
 
 # Packages
@@ -67,7 +67,7 @@ data <- pepm %>%
 #write_csv(data, "###_processed.csv") # ???
 
 
-# StatLFQ ----
+# Analyze ----
 
 
 # Packages
@@ -123,7 +123,7 @@ data4 <- data4 %>%
   add_fc_max()
 
 
-# AnnotateLFQ ----
+# Annotate ----
 
 
 # Functions
@@ -131,12 +131,31 @@ url <- "https://raw.githubusercontent.com/hickslab/ProgenesisLFQ/master/"
 source_url(paste0(url, "R/AnnotateLFQ.R"))
 
 
-# UniProt
+# Annotations
+uniprot <- "Cr_uniprot_20190130_annotation.tsv"
+
+
+# Only missing values
 data5 <- data4 %>%
   add_missingness(., data, group)
 
 
-# PlotLFQ ----
+# Heirarchical clustering
+data5 <- data5 %>%
+  filter(FDR < 0.05) %>%
+  filter(abs(`0-60_FC`) >= 1) %>%
+  calculate_hclust(., group, k = 4) %>%
+  left_join(data5, ., by = names(data5)[1])
+  
+
+# Accessions and annotate
+data5 <- data5 %>%
+  keep_entry_uniprot() %>%
+  split_identifier() %>%
+  add_uniprot(., uniprot)
+
+
+# Plot ----
 
 
 # Functions
@@ -168,3 +187,12 @@ data4 %>%
   filter(abs(`0-60_FC`) >= 1) %>% # ???
   plot_hclust(., group, k = 2) +
   theme_custom()
+
+
+# GO Summary
+data5 %>%
+  filter(Cluster != "NA") %>%
+  plot_GO_cluster(., column = "Gene ontology", top = 3) +
+  theme_custom(base_size = 24) -> p
+
+  

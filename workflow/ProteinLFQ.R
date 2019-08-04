@@ -1,8 +1,8 @@
 # ProteinLFQ
-# Protein-level label-free quantification workflow
+# Protein-Level Label-Free Quantification
 
 
-# ProcessLFQ ----
+# Process ----
 
 
 # Packages
@@ -50,7 +50,7 @@ data <- protm %>%
 #write_csv(data, "###_processed.csv") # ???
 
 
-# StatLFQ ----
+# Analyze ----
 
 
 # Packages
@@ -106,7 +106,7 @@ data4 <- data4 %>%
   add_fc_max()
 
 
-# AnnotateLFQ ----
+# Annotate ----
 
 
 # Functions
@@ -119,7 +119,7 @@ data5 <- data4 %>%
   add_missingness(., data, group)
 
 
-# PlotLFQ ----
+# Plot ----
 
 
 # Functions
