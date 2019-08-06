@@ -39,15 +39,17 @@ samples <- 11:22 # ???
 
 
 # Process data.
-data <- protm %>%
+protm2 <- protm %>%
   filter(Description != "cRAP") %>%
-  filter(`Peptide count` >= 2 & `Unique peptides` >= 1) %>%
+  filter(`Peptide count` >= 2 & `Unique peptides` >= 1)
+
+data <- protm2 %>%
   select(Accession, samples) %>%
   data.frame()
 
 
 # Write parsed data to file
-#write_csv(data, "###_processed.csv") # ???
+#write_csv(data, "###_Process.csv") # ???
 
 
 # Analyze ----

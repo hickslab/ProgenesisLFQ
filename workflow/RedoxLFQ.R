@@ -51,20 +51,22 @@ samples <- 19:34 # ???
 
 
 # Process data.
-data <- pepm %>%
+pepm2 <- pepm %>%
   filter(Score > 13) %>%
   filter(Description != "cRAP") %>%
   left_join(., protm, by = "Accession") %>%
   reduce_features() %>%
   filter_redox(., reduced = "Nethylmaleimide") %>%
   get_identifier_redox(., database, reduced = "Nethylmaleimide") %>%
-  reduce_identifiers(., samples) %>%
+  reduce_identifiers(., samples)
+
+data <- pepm2 %>%
   select(Identifier, samples) %>%
   data.frame()
 
 
 # Write parsed data to file
-#write_csv(data, "###_processed.csv") # ???
+#write_csv(data, "###_Process.csv") # ???
 
 
 # Analyze ----
@@ -103,7 +105,7 @@ data2 <- data %>%
   impute_imp4p(., group)
 
 
-# Pairwise *t*-test
+# Pairwise t-test
 data3 <- data2 %>%
   calculate_ttest(., group.compare, fdr = TRUE)
 
@@ -193,6 +195,6 @@ data4 %>%
 data5 %>%
   filter(Cluster != "NA") %>%
   plot_GO_cluster(., column = "Gene ontology", top = 3) +
-  theme_custom(base_size = 24) -> p
+  theme_custom(base_size = 24)
 
   

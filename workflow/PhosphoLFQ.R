@@ -2,7 +2,7 @@
 # Phosphosite-level label-free quantification workflow
 
 
-# ProcessLFQ ----
+# Process ----
 
 
 # Packages
@@ -51,23 +51,25 @@ samples <- 19:38 # ???
 
 
 # Process data
-data <- pepm %>%
+pepm2 <- pepm %>%
   filter(Score > 13) %>%
   filter(Description != "cRAP") %>%
   left_join(., protm, by = "Accession") %>%
   reduce_features() %>%
   filter(str_detect(Modifications, "Phospho")) %>%
   get_identifier(., database, mod = "Phospho") %>%
-  reduce_identifiers(., samples) %>%
+  reduce_identifiers(., samples)
+
+data <- pepm2 %>%
   select(Identifier, samples) %>%
   data.frame()
 
 
 # Write parsed data to file
-#write_csv(data, "###_processed.csv") # ???
+#write_csv(data, "###_Process.csv") # ???
 
 
-# StatLFQ ----
+# Analyze ----
 
 
 # Packages
@@ -103,7 +105,7 @@ data2 <- data %>%
   impute_imp4p(., group)
 
 
-# Pairwise *t*-test
+# Pairwise t-test
 data3 <- data2 %>%
   calculate_ttest(., group.compare, fdr = FALSE)
 
@@ -123,7 +125,7 @@ data4 <- data4 %>%
   add_fc_max()
 
 
-# AnnotateLFQ ----
+# Annotate ----
 
 
 # Functions
@@ -136,7 +138,7 @@ data5 <- data4 %>%
   add_missingness(., data, group)
 
 
-# PlotLFQ ----
+# Plot ----
 
 
 # Functions
