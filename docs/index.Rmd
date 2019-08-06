@@ -1,5 +1,4 @@
 ---
-title: "QuantifyR"
 output:
   html_document:
     theme: journal
@@ -264,7 +263,7 @@ source_url(paste0(url, "R/StatLFQ.R"))
 > Define input data.
 
 ```{r}
-data <- "20180502_WOS52_Cr_UPS_protm_processed.csv" %>%
+data <- "20180502_WOS52_Cr_UPS_protm_Process.csv" %>%
   read_csv(., col_types = cols()) %>%
   data.frame()
 
@@ -381,7 +380,7 @@ data4 <- data4 %>%
   filter(FDR < 0.05) %>%
   
   calculate_hclust(., group, k = 2) %>%
-  left_join(data4, ., by = data4 %>% names()[1])
+  left_join(data4, ., by = names(data4)[1])
 
 ```
 
@@ -538,7 +537,7 @@ data4 %>%
 ```
 
 
-## Pathway Analysis
+## GO Summary
 
 > Assuming data contains mapped UniProt annotations.
 
@@ -547,8 +546,6 @@ data5 %>%
   filter(FDR < 0.05) %>%
   #filter(abs(`0-60_FC`) >= 1) %>%
   #filter(cluster == "A") %>%
-  #sample_n(., 1000, replace = FALSE) %>%
-  
   plot_GO(top = 5) + theme_custom()
 
 
